@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "FriendBoat"
+version = "0.1.0"
+description = "A simple music bot for Discord"
+authors = ["Michael Genson <71845777+michael-genson@users.noreply.github.com>"]
+license = "GNU"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.7.0"
+ruff = "^0.0.284"
+mypy = "^1.5.1"
+pre-commit = "^3.3.3"
+pytest-cov = "^4.1.0"
+
+[tool.black]
+line-length = 120
+
+[tool.isort]
+line_length = 120
+
+[tool.ruff]
+extend-exclude = ["deploy/*", "tests/*"]
+line-length = 120
+target-version = "py311"
