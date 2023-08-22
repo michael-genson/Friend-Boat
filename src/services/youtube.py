@@ -1,4 +1,7 @@
 import asyncio
+import os
+import shutil
+from tempfile import TemporaryDirectory
 from typing import cast
 
 import yt_dlp  # type: ignore
@@ -8,22 +11,6 @@ from pyyoutube import Api, SearchListResponse  # type: ignore
 from ..models._base import MusicItemBase
 from ..models.youtube import SearchType, YoutubeVideo
 from ._base import MusicPlayerServiceBase
-
-ytdl = yt_dlp.YoutubeDL(
-    {
-        "format": "bestaudio/best",
-        "outtmpl": "%(extractor)s-%(id)s-%(title)s.%(ext)s",
-        "restrictfilenames": True,
-        "noplaylist": True,
-        "nocheckcertificate": True,
-        "ignoreerrors": False,
-        "logtostderr": False,
-        "quiet": True,
-        "no_warnings": True,
-        "default_search": "auto",
-        "source_address": "0.0.0.0",  # bind to ipv4 since ipv6 addresses cause issues sometimes
-    }
-)
 
 
 class YTDLSource(PCMVolumeTransformer):
@@ -44,18 +31,42 @@ class YTDLSource(PCMVolumeTransformer):
 class YouTubeService(MusicPlayerServiceBase):
     def __init__(self, api_key: str) -> None:
         self.api = Api(api_key=api_key)
+        self._temp_dir = TemporaryDirectory().name
+
+    def __del__(self):
+        try:
+            shutil.rmtree(self._temp_dir)
+        except FileNotFoundError:
+            pass
+
+    def get_ytdl(self) -> yt_dlp.YoutubeDL:
+        return yt_dlp.YoutubeDL(
+            {
+                "format": "bestaudio/best",
+                "outtmpl": os.path.join(self._temp_dir, "%(extractor)s-%(id)s-%(title)s.%(ext)s"),
+                "restrictfilenames": True,
+                "noplaylist": True,
+                "nocheckcertificate": True,
+                "ignoreerrors": False,
+                "logtostderr": False,
+                "quiet": True,
+                "no_warnings": True,
+                "default_search": "auto",
+                "source_address": "0.0.0.0",  # bind to ipv4 since ipv6 addresses cause issues sometimes
+            }
+        )
 
     @staticmethod
     def build_url_from_video_id(video_id: str) -> str:
         return f"https://www.youtube.com/watch?v={video_id}"
 
-    @classmethod
     async def build_ytdl_source(
-        cls, video: YoutubeVideo, *, loop: asyncio.AbstractEventLoop | None = None, stream=False
+        self, video: YoutubeVideo, *, loop: asyncio.AbstractEventLoop | None = None, stream=False
     ) -> YTDLSource:
         if not loop:
             loop = asyncio.get_event_loop()
 
+        ytdl = self.get_ytdl()
         data: dict = await loop.run_in_executor(None, lambda: ytdl.extract_info(video.url, download=not stream))
         if "entries" in data:
             # take first item from a playlist
