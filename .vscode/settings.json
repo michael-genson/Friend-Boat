@@ -11,6 +11,9 @@
     "--enable=W0614"
   ],
   "explorer.fileNesting.enabled": true,
+  "python.analysis.extraPaths": [
+    "src"
+  ],
   "python.formatting.provider": "black",
   "isort.args": [
     "--profile",
@@ -39,10 +42,7 @@
     "jinja-html": "html"
   },
   "python.analysis.typeCheckingMode": "off",
-  "cSpell.words": [
-    "Alexa",
-    "todoist"
-  ],
+  "cSpell.words": [],
   "python.testing.pytestArgs": [
     "--cov=src/",
     "tests/"
