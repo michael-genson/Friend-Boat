@@ -59,7 +59,7 @@ class Music(DiscordCogBase):
                 requestor=ctx.author,
             )
 
-        await ctx.respond("Queued:", embed=music_item.embed, ephemeral=True)
+        await ctx.respond("Queued:", embed=music_item.embeds.queued, ephemeral=True)
 
         # queue up the youtube video and start playback if nothing else is playing
         player_service = player_service_by_guild[ctx.guild.id]

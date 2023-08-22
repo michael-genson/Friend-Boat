@@ -73,7 +73,9 @@ class MusicQueueService:
         self._voice_client.play(player, after=lambda ex: asyncio.run_coroutine_threadsafe(self._play_next(ex), loop))
 
         if self._currently_playing_message:
-            await self._currently_playing_message.edit(content="Now Playing:", embed=self.currently_playing.embed)
+            await self._currently_playing_message.edit(
+                content="Now Playing:", embed=self.currently_playing.embeds.playing
+            )
 
     def clear(self) -> None:
         """Clear the queue"""
