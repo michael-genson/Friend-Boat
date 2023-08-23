@@ -6,12 +6,13 @@ from discord.ext.commands import Bot, when_mentioned_or
 from .cogs import all_cogs
 from .settings import Settings
 
-logging.basicConfig(level=logging.INFO)
-
 
 def init_bot() -> None:
-    # set up bot
     settings = Settings()
+    logging.basicConfig(level=settings.log_level)
+
+    # set up bot
+
     intents = discord.Intents.default()
     intents.message_content = True
     intents.voice_states = True
