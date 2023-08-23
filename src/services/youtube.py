@@ -15,7 +15,8 @@ from src.models.youtube import SearchType, YoutubeVideo
 from ._base import MusicPlayerServiceBase
 
 youtube_video_id_pattern = re.compile(
-    r"^(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})(?:\S+)?$"
+    r"^(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com"
+    r"\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})(?:\S+)?$"
 )
 
 
