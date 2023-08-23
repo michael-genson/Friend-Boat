@@ -37,6 +37,8 @@ class Music(DiscordCogBase):
         else:
             logging.debug(traceback.format_exc())
 
+    ### Music Controls ###
+
     @require_server_presence()
     @slash_command(
         description="Play a YouTube video, or search for one. If something is already playing, it's added to the queue"
@@ -104,11 +106,27 @@ class Music(DiscordCogBase):
     @require_server_presence()
     @slash_command(description="Stop playing the current Youtube video and clear the queue")
     async def stop(self, ctx: ApplicationContext):
+        if ctx.guild_id not in player_service_by_guild:
+            return await ctx.respond("Nothing is currently playing", ephemeral=True)
+
         player_service = player_service_by_guild[ctx.guild_id]
         async with ctx.typing():
             await player_service.stop()
+            del player_service_by_guild[ctx.guild_id]
 
         await ctx.respond("Stopped playback and cleared queue", ephemeral=True)
+
+    @require_server_presence()
+    @slash_command(description="Shuffle the queue")
+    async def shuffle(self, ctx: ApplicationContext):
+        player_service = player_service_by_guild[ctx.guild_id]
+        if not player_service.queue_size:
+            await ctx.respond("Nothing is currently queued", ephemeral=True)
+        else:
+            player_service.shuffle()
+            await ctx.respond("Queue shuffled", ephemeral=True)
+
+    ### Status ###
 
     @require_server_presence()
     @slash_command(description="Show what's currently playing")

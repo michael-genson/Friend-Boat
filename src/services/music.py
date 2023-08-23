@@ -1,4 +1,5 @@
 import asyncio
+import random
 from queue import Empty, Queue
 from typing import cast
 
@@ -12,6 +13,7 @@ from src.models.music import MusicQueueEmbeds, MusicQueueFullError, MusicQueueIt
 class MusicQueueService:
     def __init__(self) -> None:
         settings = Settings()
+        self._embeds: MusicQueueEmbeds | None = None
 
         # queue
         self._queue: Queue[MusicQueueItem] = Queue()
@@ -27,7 +29,9 @@ class MusicQueueService:
         self._voice_client: VoiceClient | None = None
         """The voice client we are connected to while playing"""
 
-        self._embeds: MusicQueueEmbeds | None = None
+    @property
+    def queue_size(self) -> int:
+        return self._queue.qsize()
 
     @property
     def is_alone(self) -> bool:
@@ -46,6 +50,13 @@ class MusicQueueService:
             return None
         else:
             return self._voice_client.channel.id  # type: ignore [attr-defined]
+
+    @property
+    def embeds(self) -> MusicQueueEmbeds:
+        if not self._embeds:
+            self._embeds = MusicQueueEmbeds(self._queue)
+
+        return self._embeds
 
     async def start_playing(self, currently_playing_message: Message, voice_channel: VocalGuildChannel) -> None:
         """Start playing the queue"""
@@ -79,13 +90,6 @@ class MusicQueueService:
                 content="Now Playing:", embed=self.currently_playing.embeds.playing
             )
 
-    @property
-    def embeds(self) -> MusicQueueEmbeds:
-        if not self._embeds:
-            self._embeds = MusicQueueEmbeds(self._queue)
-
-        return self._embeds
-
     def clear(self) -> None:
         """Clear the queue"""
 
@@ -110,6 +114,7 @@ class MusicQueueService:
 
         if self._currently_playing_message:
             await self._currently_playing_message.delete()
+            self._currently_playing_message = None
 
     def add_to_queue(self, item: MusicQueueItem) -> None:
         """Puts an item into the queue. Raises a `MusicQueueFullError` if the queue is full"""
@@ -118,3 +123,6 @@ class MusicQueueService:
             raise MusicQueueFullError()
 
         self._queue.put(item)
+
+    def shuffle(self) -> None:
+        random.shuffle(self._queue.queue)
