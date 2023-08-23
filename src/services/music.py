@@ -6,7 +6,7 @@ from discord import Message, VoiceClient
 from discord.channel import VocalGuildChannel
 
 from src.bots.settings import Settings
-from src.models.music import MusicQueueFullError, MusicQueueItem
+from src.models.music import MusicQueueEmbeds, MusicQueueFullError, MusicQueueItem
 
 
 class MusicQueueService:
@@ -26,6 +26,8 @@ class MusicQueueService:
 
         self._voice_client: VoiceClient | None = None
         """The voice client we are connected to while playing"""
+
+        self._embeds: MusicQueueEmbeds | None = None
 
     @property
     def is_alone(self) -> bool:
@@ -77,10 +79,18 @@ class MusicQueueService:
                 content="Now Playing:", embed=self.currently_playing.embeds.playing
             )
 
+    @property
+    def embeds(self) -> MusicQueueEmbeds:
+        if not self._embeds:
+            self._embeds = MusicQueueEmbeds(self._queue)
+
+        return self._embeds
+
     def clear(self) -> None:
         """Clear the queue"""
 
         self._queue = Queue()
+        self._embeds = None
 
     async def skip(self) -> None:
         if self._voice_client and self._voice_client.is_playing():

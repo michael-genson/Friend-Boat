@@ -16,5 +16,5 @@ class YoutubeVideo(MusicItemBase):
 
 
 class NoResultsFoundError(CommandError):
-    def __init__(self, query: str, *args: object) -> None:
+    def __init__(self, query: str) -> None:
         super().__init__(f'No results found for query: "{query}"')

@@ -1,3 +1,5 @@
+import logging
+import traceback
 from collections import defaultdict
 
 from discord import ApplicationContext, Member, VoiceState, option, slash_command
@@ -6,6 +8,7 @@ from discord.ext.commands import Cog
 
 from src.models.bots import DiscordCogBase, UserNotInServerError, UserNotInVoiceChannelError, require_server_presence
 from src.models.music import MusicQueueFullError, MusicQueueItem
+from src.models.paginator import SimplePaginator
 from src.models.youtube import NoResultsFoundError
 from src.services.music import MusicQueueService
 from src.services.youtube import YouTubeService
@@ -18,13 +21,21 @@ player_service_by_guild: defaultdict[int, MusicQueueService] = defaultdict(Music
 class Music(DiscordCogBase):
     @Cog.listener()
     async def on_voice_state_update(self, member: Member, before: VoiceState, after: VoiceState) -> None:
-        """
-        Leave empty voice channels
-        """
+        """Leave empty voice channels"""
 
         player_service = player_service_by_guild[member.guild.id]
         if player_service.is_alone:
             await player_service.stop()
+
+    async def cog_command_error(self, ctx: ApplicationContext, error: Exception):
+        """Base error handling"""
+
+        if isinstance(error, UserNotInVoiceChannelError):
+            await ctx.respond("You must be in a voice channel to use this command", ephemeral=True)
+        elif isinstance(error, UserNotInServerError):
+            await ctx.respond("You must be in a server to use this command", ephemeral=True)
+        else:
+            logging.debug(traceback.format_exc())
 
     @require_server_presence()
     @slash_command(
@@ -106,10 +117,16 @@ class Music(DiscordCogBase):
         if not player_service.currently_playing:
             await ctx.respond("Nothing is currently playing", ephemeral=True)
         else:
-            await ctx.respond("Now Playing:", embed=player_service.currently_playing.embeds.playing)
+            await ctx.respond("Now Playing:", embed=player_service.currently_playing.embeds.playing, ephemeral=True)
 
-    async def cog_command_error(self, ctx: ApplicationContext, error: Exception):
-        if isinstance(error, UserNotInVoiceChannelError):
-            return await ctx.respond("You must be in a voice channel to use this command", ephemeral=True)
-        elif isinstance(error, UserNotInServerError):
-            return await ctx.respond("You must be in a server to use this command", ephemeral=True)
+    @require_server_presence()
+    @slash_command(description="List everything coming up")
+    async def up_next(self, ctx: ApplicationContext):
+        player_service = player_service_by_guild[ctx.guild_id]
+        pages = player_service.embeds.queue_pages
+        if not pages:
+            await ctx.respond("Nothing is currently queued", ephemeral=True)
+        else:
+            settings = Settings()
+            await ctx.respond("Here's what's up next:")
+            await SimplePaginator(timeout=settings.queue_paginator_timeout).start(ctx, pages=pages)

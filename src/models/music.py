@@ -1,12 +1,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from queue import Queue
+from typing import Generator, TypeVar
 
 from discord import Embed, Member, PCMVolumeTransformer, User
 from discord.ext.commands import CommandError
 
-from ..services._base import MusicPlayerServiceBase
+from src.bots.settings import Settings
+from src.services._base import MusicPlayerServiceBase
+
 from ._base import MusicItemBase
+
+T = TypeVar("T")
 
 
 @dataclass
@@ -20,7 +26,7 @@ class MusicQueueItem:
     @property
     def embeds(self) -> MusicQueueItemEmbeds:
         if not self._embeds:
-            self._embeds: MusicQueueItemEmbeds = MusicQueueItemEmbeds(self.music, self.requestor)
+            self._embeds = MusicQueueItemEmbeds(self.music, self.requestor)
 
         return self._embeds
 
@@ -49,6 +55,38 @@ class MusicQueueItemEmbeds:
             embed.set_footer(text=f'query: "{self.item.original_query}"')
 
         return embed
+
+
+class MusicQueueEmbeds:
+    def __init__(self, queue: Queue[MusicQueueItem]) -> None:
+        self._music_queue = queue
+
+    @staticmethod
+    def chunk_list(list_: list[T], chunk_size: int) -> Generator[list[T], list[T], None]:
+        """Break a list into smaller list of size `chunk_size`"""
+        for i in range(0, len(list_), chunk_size):
+            yield list_[i : i + chunk_size]
+
+    def _build_queue_item_text(self, item: MusicQueueItem) -> str:
+        return f"**{item.music.name}**, requested by *{item.requestor.display_name}*"
+
+    def _build_queue_item_page(self, items: list[MusicQueueItem]) -> Embed:
+        return Embed(
+            title="Up Next",
+            description="\n---\n".join([self._build_queue_item_text(item) for item in items]),
+        )
+
+    @property
+    def queue_pages(self) -> list[Embed]:
+        """A list of embeds, each representing one page of queue items"""
+
+        settings = Settings()
+
+        all_items: list[MusicQueueItem] = list(self._music_queue.queue)
+        return [
+            self._build_queue_item_page(chunk)
+            for chunk in self.chunk_list(all_items, settings.queue_paginator_page_size)
+        ]
 
 
 class MusicQueueFullError(CommandError):

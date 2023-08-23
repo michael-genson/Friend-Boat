@@ -6,10 +6,11 @@ from typing import cast
 
 import yt_dlp  # type: ignore
 from discord import FFmpegPCMAudio, PCMVolumeTransformer
-from pyyoutube import Api, SearchListResponse  # type: ignore
+from pyyoutube import Api, SearchListResponse, SearchResult  # type: ignore
 
-from ..models._base import MusicItemBase
-from ..models.youtube import SearchType, YoutubeVideo
+from src.models._base import MusicItemBase
+from src.models.youtube import SearchType, YoutubeVideo
+
 from ._base import MusicPlayerServiceBase
 
 
@@ -79,10 +80,18 @@ class YouTubeService(MusicPlayerServiceBase):
         """Searches YouTube for a video using a query string and returns the URL of that video, if found"""
 
         results: SearchListResponse = self.api.search(q=query, search_type=SearchType.video.value)
-        if not results.items:
+
+        result: SearchResult | None = None
+        for item in results.items:
+            if item.snippet.liveBroadcastContent and item.snippet.liveBroadcastContent != "none":
+                continue
+
+            result = item
+            break
+
+        if not result:
             return None
 
-        result = results.items[0]
         thumbnail_url = (
             result.snippet.thumbnails.default.url
             if result.snippet.thumbnails and result.snippet.thumbnails.default
