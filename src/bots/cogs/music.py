@@ -1,11 +1,10 @@
-import traceback
 from collections import defaultdict
 
 from discord import ApplicationContext, Member, VoiceState, option, slash_command
 from discord.channel import VocalGuildChannel
 from discord.ext.commands import Cog
 
-from src.models.bots import DiscordCogBase, NotVoiceChannelError
+from src.models.bots import DiscordCogBase, UserNotInServerError, UserNotInVoiceChannelError, require_server_presence
 from src.models.music import MusicQueueFullError, MusicQueueItem
 from src.models.youtube import NoResultsFoundError
 from src.services.music import MusicQueueService
@@ -27,6 +26,7 @@ class Music(DiscordCogBase):
         if player_service.is_alone:
             await player_service.stop()
 
+    @require_server_presence()
     @slash_command(
         description="Play a YouTube video, or search for one. If something is already playing, it's added to the queue"
     )
@@ -43,7 +43,7 @@ class Music(DiscordCogBase):
             voice_channel = None
 
         if not (voice_channel and ctx.guild):
-            raise NotVoiceChannelError()
+            raise UserNotInVoiceChannelError()
 
         # find the youtube video
         async with ctx.typing():
@@ -74,36 +74,42 @@ class Music(DiscordCogBase):
 
     @play.error
     async def play_error(self, ctx: ApplicationContext, ex: Exception):
-        if isinstance(ex, NotVoiceChannelError):
-            await ctx.respond("You must be in a voice channel to play something", ephemeral=True)
-        elif isinstance(ex, NoResultsFoundError):
+        if isinstance(ex, NoResultsFoundError):
             await ctx.respond(
                 "Sorry, no results found for that video. Please try another video or search term", ephemeral=True
             )
         elif isinstance(ex, MusicQueueFullError):
             await ctx.respond("Sorry, the queue is currently full", ephemeral=True)
-        else:
-            traceback.print_exc()
-            await ctx.respond("Sorry, something went wrong", ephemeral=True)
 
+    @require_server_presence()
     @slash_command(description="Skip the current Youtube video and go to the next one")
     async def skip(self, ctx: ApplicationContext):
-        if not ctx.guild:
-            return
-
-        player_service = player_service_by_guild[ctx.guild.id]
+        player_service = player_service_by_guild[ctx.guild_id]
         async with ctx.typing():
             await player_service.skip()
 
         await ctx.respond("Skipped", ephemeral=True)
 
+    @require_server_presence()
     @slash_command(description="Stop playing the current Youtube video and clear the queue")
     async def stop(self, ctx: ApplicationContext):
-        if not ctx.guild:
-            return
-
-        player_service = player_service_by_guild[ctx.guild.id]
+        player_service = player_service_by_guild[ctx.guild_id]
         async with ctx.typing():
             await player_service.stop()
 
         await ctx.respond("Stopped playback and cleared queue", ephemeral=True)
+
+    @require_server_presence()
+    @slash_command(description="Show what's currently playing")
+    async def now_playing(self, ctx: ApplicationContext):
+        player_service = player_service_by_guild[ctx.guild_id]
+        if not player_service.currently_playing:
+            await ctx.respond("Nothing is currently playing", ephemeral=True)
+        else:
+            await ctx.respond("Now Playing:", embed=player_service.currently_playing.embeds.playing)
+
+    async def cog_command_error(self, ctx: ApplicationContext, error: Exception):
+        if isinstance(error, UserNotInVoiceChannelError):
+            return await ctx.respond("You must be in a voice channel to use this command", ephemeral=True)
+        elif isinstance(error, UserNotInServerError):
+            return await ctx.respond("You must be in a server to use this command", ephemeral=True)

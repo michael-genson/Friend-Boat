@@ -12,7 +12,6 @@ def init_bot() -> None:
     logging.basicConfig(level=settings.log_level)
 
     # set up bot
-
     intents = discord.Intents.default()
     intents.message_content = True
     intents.voice_states = True
