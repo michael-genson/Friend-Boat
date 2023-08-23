@@ -46,7 +46,7 @@ class MusicQueueItemEmbeds:
         embed.set_author(name=self.author.display_name, icon_url=self.author.display_avatar.url)
 
         if self.item.original_query:
-            embed.set_footer(text=f"query: {self.item.original_query}")
+            embed.set_footer(text=f'query: "{self.item.original_query}"')
 
         return embed
 

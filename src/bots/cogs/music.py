@@ -1,7 +1,7 @@
 import traceback
 from collections import defaultdict
 
-from discord import ApplicationContext, Member, VoiceState, slash_command
+from discord import ApplicationContext, Member, VoiceState, option, slash_command
 from discord.channel import VocalGuildChannel
 from discord.ext.commands import Cog
 
@@ -30,6 +30,7 @@ class Music(DiscordCogBase):
     @slash_command(
         description="Play a YouTube video, or search for one. If something is already playing, it's added to the queue"
     )
+    @option("query", description="a YouTube Video URL or search query")
     async def play(self, ctx: ApplicationContext, query: str):
         # make sure the command was issued from a user in a voice channel
         if (
