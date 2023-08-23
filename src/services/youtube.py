@@ -1,17 +1,22 @@
 import asyncio
 import os
+import re
 import shutil
 from tempfile import TemporaryDirectory
 from typing import cast
 
 import yt_dlp  # type: ignore
 from discord import FFmpegPCMAudio, PCMVolumeTransformer
-from pyyoutube import Api, SearchListResponse, SearchResult  # type: ignore
+from pyyoutube import Api, SearchListResponse, SearchResult, Video, VideoListResponse  # type: ignore
 
 from src.models._base import MusicItemBase
 from src.models.youtube import SearchType, YoutubeVideo
 
 from ._base import MusicPlayerServiceBase
+
+youtube_video_id_pattern = re.compile(
+    r"^(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})(?:\S+)?$"
+)
 
 
 class YTDLSource(PCMVolumeTransformer):
@@ -39,6 +44,19 @@ class YouTubeService(MusicPlayerServiceBase):
             shutil.rmtree(self._temp_dir)
         except FileNotFoundError:
             pass
+
+    @staticmethod
+    def get_youtube_video_id_from_url(url: str | None) -> str | None:
+        """Extracts the video id from a YouTube video URL, if the URL is valid"""
+
+        if not url:
+            return None
+
+        matches: list[tuple[str]] = re.findall(youtube_video_id_pattern, url)
+        if not matches:
+            return None
+        else:
+            return matches[0][0]
 
     def get_ytdl(self) -> yt_dlp.YoutubeDL:
         return yt_dlp.YoutubeDL(
@@ -79,17 +97,29 @@ class YouTubeService(MusicPlayerServiceBase):
     def search_video(self, query: str) -> YoutubeVideo | None:
         """Searches YouTube for a video using a query string and returns the URL of that video, if found"""
 
-        results: SearchListResponse = self.api.search(q=query, search_type=SearchType.video.value)
+        response: SearchListResponse | VideoListResponse | None = None
+        video_id = self.get_youtube_video_id_from_url(query)
+        if video_id:
+            # try to find the video by searching by id
+            response = self.api.get_video_by_id(video_id=video_id)
+            if not (response and response.items):
+                response = None
 
-        result: SearchResult | None = None
-        for item in results.items:
+        if not response:
+            # try to find the video by querying as a search term
+            response = self.api.search(q=query, search_type=SearchType.video.value)
+            if not response:
+                return None
+
+        result: SearchResult | Video | None = None
+        for item in response.items:
             if item.snippet.liveBroadcastContent and item.snippet.liveBroadcastContent != "none":
                 continue
 
             result = item
             break
 
-        if not result:
+        if not (result and result.snippet):
             return None
 
         thumbnail_url = (
@@ -98,8 +128,15 @@ class YouTubeService(MusicPlayerServiceBase):
             else None
         )
 
+        if not result.id:
+            return None
+        elif isinstance(result, SearchResult):
+            url = self.build_url_from_video_id(result.id.videoId)
+        else:
+            url = self.build_url_from_video_id(result.id)
+
         return YoutubeVideo(
-            url=self.build_url_from_video_id(result.id.videoId),
+            url=url,
             name=self.cln(result.snippet.title),
             description=self.cln(result.snippet.description),
             thumbnail_url=thumbnail_url,

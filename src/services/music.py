@@ -89,8 +89,8 @@ class MusicQueueService:
     def clear(self) -> None:
         """Clear the queue"""
 
-        self._queue = Queue()
-        self._embeds = None
+        self._queue = Queue()  # TODO: actually clear the queue instead of making a new one
+        self._embeds = None  # TODO: this is unnecessary if we properly clear the queue
 
     async def skip(self) -> None:
         if self._voice_client and self._voice_client.is_playing():
