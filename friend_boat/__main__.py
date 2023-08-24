@@ -19,7 +19,7 @@ def main() -> None:
     if args.youtube_api_key:
         os.environ["youtube_api_key"] = args.youtube_api_key
 
-    if not all([os.environ.get("discord_bot_token"), os.environ.get("youtube_api_key")]):
+    if not all([os.environ.get("DISCORD_BOT_TOKEN"), os.environ.get("YOUTUBE_API_KEY")]):
         raise Exception(
             "You must provide both a Discord Bot Token and a Google API Key with access to the YouTube Data API v3"
         )
