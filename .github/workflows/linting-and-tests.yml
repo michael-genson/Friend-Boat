@@ -56,10 +56,5 @@ jobs:
           poetry run mypy friend_boat
 
       - name: Pytest
-        env:
-          RATE_LIMIT_MINUTELY_READ: "60"
-          RATE_LIMIT_MINUTELY_MODIFY: "60"
-          RATE_LIMIT_MINUTELY_SYNC: "60"
-          USE_WHITELIST: "false"
         run: |
           poetry run pytest

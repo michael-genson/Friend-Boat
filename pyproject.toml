@@ -20,6 +20,7 @@ ruff = "^0.0.284"
 mypy = "^1.5.1"
 pre-commit = "^3.3.3"
 pytest-cov = "^4.1.0"
+bumpversion = "^0.6.0"
 
 [tool.black]
 line-length = 120
