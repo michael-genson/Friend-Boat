@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "FriendBoat"
-version = "0.1.0"
+version = "0.1.1"
 description = "A simple music bot for Discord"
 authors = ["Michael Genson <71845777+michael-genson@users.noreply.github.com>"]
 license = "GNU"
