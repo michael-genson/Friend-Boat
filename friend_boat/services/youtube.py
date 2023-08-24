@@ -92,8 +92,13 @@ class YouTubeService(MusicPlayerServiceBase):
             # take first item from a playlist
             data = cast(dict, data["entries"][0])
 
-        filename = data["url"] if stream else ytdl.prepare_filename(data)
-        return YTDLSource(FFmpegPCMAudio(filename, options="-vn"), data=data)
+        pcm = FFmpegPCMAudio(
+            data["url"] if stream else ytdl.prepare_filename(data),
+            options="-vn",
+            # prevents early stream terminations (requires ffmpeg >= 3): https://github.com/Rapptz/discord.py/issues/315
+            before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
+        )
+        return YTDLSource(pcm, data=data)
 
     def search_video(self, query: str) -> YoutubeVideo | None:
         """Searches YouTube for a video using a query string and returns the URL of that video, if found"""
@@ -148,4 +153,4 @@ class YouTubeService(MusicPlayerServiceBase):
         if not isinstance(item, YoutubeVideo):
             raise Exception("This service does not support this item")
 
-        return await self.build_ytdl_source(item)
+        return await self.build_ytdl_source(item, stream=True)

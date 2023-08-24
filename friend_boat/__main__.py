@@ -3,7 +3,7 @@
 import argparse
 import os
 
-from friend_boat.bots.bot import init_bot
+from friend_boat.bots.bot import init_bot, run_bot
 
 parser = argparse.ArgumentParser(prog="FriendBoat", description="A simple music bot for Discord")
 parser.add_argument("--discord-token", type=str, help="your Discord Bot Token", required=False)
@@ -24,7 +24,8 @@ def main() -> None:
             "You must provide both a Discord Bot Token and a Google API Key with access to the YouTube Data API v3"
         )
 
-    init_bot()
+    bot = init_bot()
+    run_bot(bot)
 
 
 if __name__ == "__main__":

@@ -7,7 +7,11 @@ from .cogs import all_cogs
 from .settings import Settings
 
 
-def init_bot() -> None:
+def run_bot(bot: Bot) -> None:
+    bot.run()
+
+
+def init_bot() -> Bot:
     settings = Settings()
     logging.basicConfig(level=settings.log_level)
 
@@ -23,5 +27,4 @@ def init_bot() -> None:
     for cog in [cog(bot) for cog in all_cogs()]:
         bot.add_cog(cog)
 
-    # run bot
-    bot.run(settings.discord_bot_token)
+    return bot
