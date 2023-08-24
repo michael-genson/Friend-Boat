@@ -49,7 +49,8 @@ class Music(DiscordCogBase):
         description="Play a YouTube video, or search for one. If something is already playing, it's added to the queue"
     )
     @option("query", description="a YouTube Video URL or search query")
-    async def play(self, ctx: ApplicationContext, query: str):
+    @option("skip_ahead", description="how far to skip ahead when starting playback, in seconds")
+    async def play(self, ctx: ApplicationContext, query: str, skip_ahead: int = 0):
         # make sure the command was issued from a user in a voice channel
         if (
             isinstance(ctx.author, Member)
@@ -76,6 +77,7 @@ class Music(DiscordCogBase):
                 player_service=yt_service,
                 music=yt_video,
                 requestor=ctx.author,
+                start_at=skip_ahead * 1000,  # skip_ahead is in seconds, but start_at is in milliseconds
             )
 
         await ctx.respond("Queued:", embed=music_item.embeds.queued, ephemeral=True)

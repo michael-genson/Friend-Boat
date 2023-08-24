@@ -6,13 +6,12 @@ from tempfile import TemporaryDirectory
 from typing import cast
 
 import yt_dlp  # type: ignore
-from discord import FFmpegPCMAudio
 from pyyoutube import Api, SearchListResponse, SearchResult, Video, VideoListResponse  # type: ignore
 
 from friend_boat.models._base import MusicItemBase
 from friend_boat.models.youtube import SearchType, YoutubeVideo
 
-from ._base import MusicPlayerServiceBase
+from ._base import AudioStream, MusicPlayerServiceBase
 
 youtube_video_id_pattern = re.compile(
     r"^(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com"
@@ -114,7 +113,7 @@ class YouTubeService(MusicPlayerServiceBase):
             }
         )
 
-    async def get_source(self, item: MusicItemBase) -> FFmpegPCMAudio:
+    async def get_source(self, item: MusicItemBase, *, start_at: int = 0) -> AudioStream:
         if not isinstance(item, YoutubeVideo):
             raise Exception("This service does not support this item")
 
@@ -125,8 +124,9 @@ class YouTubeService(MusicPlayerServiceBase):
             # take first item from a playlist
             data = cast(dict, data["entries"][0])
 
-        return FFmpegPCMAudio(
+        return AudioStream(
             data["url"],
+            start_at=start_at,
             options="-vn",
             # prevents early stream terminations (requires ffmpeg >= 3): https://github.com/Rapptz/discord.py/issues/315
             before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",

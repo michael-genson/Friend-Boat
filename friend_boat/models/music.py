@@ -21,6 +21,9 @@ class MusicQueueItem:
     music: MusicItemBase
     requestor: Member | User
 
+    start_at: int = 0
+    """When to start playback, in milliseconds"""
+
     _embeds: MusicQueueItemEmbeds | None = None
 
     @property
@@ -31,7 +34,7 @@ class MusicQueueItem:
         return self._embeds
 
     async def get_player(self) -> PCMVolumeTransformer:
-        source = await self.player_service.get_source(self.music)
+        source = await self.player_service.get_source(self.music, start_at=self.start_at)
         return await self.player_service.get_player(source)
 
 
