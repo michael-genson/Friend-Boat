@@ -4,11 +4,11 @@ from dataclasses import dataclass
 from queue import Queue
 from typing import Generator, TypeVar
 
-from discord import Embed, Member, PCMVolumeTransformer, User
+from discord import Embed, Member, User
 from discord.ext.commands import CommandError
 
 from friend_boat.bots.settings import Settings
-from friend_boat.services._base import MusicPlayerServiceBase
+from friend_boat.services._base import AudioPlayer, MusicPlayerServiceBase
 
 from ._base import MusicItemBase
 
@@ -25,6 +25,7 @@ class MusicQueueItem:
     """When to start playback, in milliseconds"""
 
     _embeds: MusicQueueItemEmbeds | None = None
+    _player: AudioPlayer | None = None
 
     @property
     def embeds(self) -> MusicQueueItemEmbeds:
@@ -33,9 +34,19 @@ class MusicQueueItem:
 
         return self._embeds
 
-    async def get_player(self) -> PCMVolumeTransformer:
+    @property
+    def position(self) -> int:
+        """The playback position, in milliseconds"""
+
+        return self._player.position if self._player else 0
+
+    async def get_player(self, start_at: int | None = None) -> AudioPlayer:
+        if start_at is None:
+            start_at = self.start_at
+
         source = await self.player_service.get_source(self.music, start_at=self.start_at)
-        return await self.player_service.get_player(source)
+        self._player = await self.player_service.get_player(source)
+        return self._player
 
 
 class MusicQueueItemEmbeds:

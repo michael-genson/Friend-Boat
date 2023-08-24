@@ -39,13 +39,32 @@ class AudioStream(FFmpegPCMAudio):
             source, executable=executable, pipe=pipe, stderr=stderr, before_options=before_options, options=options
         )
 
-        self._counter: int = start_at
+        self._position: int = start_at
         """counter of how far into playback we are, in milliseconds"""
 
+    @property
+    def position(self) -> int:
+        """The playback position, in milliseconds"""
+
+        return self._position
+
     def read(self) -> bytes:
-        self._counter += 20  # reads are buffered in 20ms chunks
+        self._position += 20  # reads are buffered in 20ms chunks
 
         return super().read()
+
+
+class AudioPlayer(PCMVolumeTransformer):
+    def __init__(self, source: AudioStream, volume: float = 0.5):
+        self.source = source
+
+        super().__init__(source, volume)
+
+    @property
+    def position(self) -> int:
+        """The playback position, in milliseconds"""
+
+        return self.source.position
 
 
 class MusicPlayerServiceBase(ABC):
@@ -53,8 +72,8 @@ class MusicPlayerServiceBase(ABC):
     async def get_source(self, item: MusicItemBase, *, start_at: int = 0) -> AudioStream:
         ...
 
-    async def get_player(self, source: AudioStream) -> PCMVolumeTransformer:
-        return PCMVolumeTransformer(source, volume=0.5)
+    async def get_player(self, source: AudioStream) -> AudioPlayer:
+        return AudioPlayer(source)
 
     @staticmethod
     def cln(text: str | None, unescape_html: bool = True) -> str:
