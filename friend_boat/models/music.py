@@ -7,8 +7,8 @@ from typing import Generator, TypeVar
 from discord import Embed, Member, PCMVolumeTransformer, User
 from discord.ext.commands import CommandError
 
-from src.bots.settings import Settings
-from src.services._base import MusicPlayerServiceBase
+from friend_boat.bots.settings import Settings
+from friend_boat.services._base import MusicPlayerServiceBase
 
 from ._base import MusicItemBase
 

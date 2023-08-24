@@ -12,7 +12,7 @@
   ],
   "explorer.fileNesting.enabled": true,
   "python.analysis.extraPaths": [
-    "src"
+    "friend_boat"
   ],
   "python.formatting.provider": "black",
   "isort.args": [
@@ -44,7 +44,7 @@
   "python.analysis.typeCheckingMode": "off",
   "cSpell.words": [],
   "python.testing.pytestArgs": [
-    "--cov=src/",
+    "--cov=friend_boat/",
     "tests/"
   ],
   "python.testing.unittestEnabled": false,

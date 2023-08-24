@@ -9,8 +9,8 @@ import yt_dlp  # type: ignore
 from discord import FFmpegPCMAudio, PCMVolumeTransformer
 from pyyoutube import Api, SearchListResponse, SearchResult, Video, VideoListResponse  # type: ignore
 
-from src.models._base import MusicItemBase
-from src.models.youtube import SearchType, YoutubeVideo
+from friend_boat.models._base import MusicItemBase
+from friend_boat.models.youtube import SearchType, YoutubeVideo
 
 from ._base import MusicPlayerServiceBase
 

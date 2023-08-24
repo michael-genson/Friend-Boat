@@ -6,4 +6,4 @@ run:
 	export PYTHONPATH=. && \
 	export LOG_LEVEL=20 && \
 	export DEBUG=true && \
-	python src
+	python friend_boat

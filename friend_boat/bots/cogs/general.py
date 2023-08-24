@@ -1,7 +1,7 @@
 from discord import ApplicationContext, Member, slash_command
 from discord.ext.commands import command, is_owner
 
-from src.models.bots import DiscordCogBase
+from friend_boat.models.bots import DiscordCogBase
 
 
 class General(DiscordCogBase):

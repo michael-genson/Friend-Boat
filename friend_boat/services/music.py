@@ -6,8 +6,8 @@ from typing import cast
 from discord import Message, VoiceClient
 from discord.channel import VocalGuildChannel
 
-from src.bots.settings import Settings
-from src.models.music import MusicQueueEmbeds, MusicQueueFullError, MusicQueueItem
+from friend_boat.bots.settings import Settings
+from friend_boat.models.music import MusicQueueEmbeds, MusicQueueFullError, MusicQueueItem
 
 
 class MusicQueueService:

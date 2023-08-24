@@ -1,6 +1,6 @@
 from typing import Type
 
-from src.models.bots import DiscordCogBase
+from friend_boat.models.bots import DiscordCogBase
 
 from .general import General
 from .music import Music

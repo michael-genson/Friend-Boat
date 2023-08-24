@@ -6,12 +6,17 @@ from discord import ApplicationContext, Member, VoiceState, option, slash_comman
 from discord.channel import VocalGuildChannel
 from discord.ext.commands import Cog
 
-from src.models.bots import DiscordCogBase, UserNotInServerError, UserNotInVoiceChannelError, require_server_presence
-from src.models.music import MusicQueueFullError, MusicQueueItem
-from src.models.paginator import SimplePaginator
-from src.models.youtube import NoResultsFoundError
-from src.services.music import MusicQueueService
-from src.services.youtube import YouTubeService
+from friend_boat.models.bots import (
+    DiscordCogBase,
+    UserNotInServerError,
+    UserNotInVoiceChannelError,
+    require_server_presence,
+)
+from friend_boat.models.music import MusicQueueFullError, MusicQueueItem
+from friend_boat.models.paginator import SimplePaginator
+from friend_boat.models.youtube import NoResultsFoundError
+from friend_boat.services.music import MusicQueueService
+from friend_boat.services.youtube import YouTubeService
 
 from ..settings import Settings
 

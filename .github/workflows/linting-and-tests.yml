@@ -45,15 +45,15 @@ jobs:
 
       - name: Formatting (Black)
         run: |
-          poetry run black src --check
+          poetry run black friend_boat --check
 
       - name: Lint (Ruff)
         run: |
-          poetry run ruff src
+          poetry run ruff friend_boat
 
       - name: Mypy
         run: |
-          poetry run mypy src
+          poetry run mypy friend_boat
 
       - name: Pytest
         env:

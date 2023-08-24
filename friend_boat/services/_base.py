@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 
 from discord import PCMVolumeTransformer
 
-from src.models._base import MusicItemBase
+from friend_boat.models._base import MusicItemBase
 
 
 class MusicPlayerServiceBase(ABC):

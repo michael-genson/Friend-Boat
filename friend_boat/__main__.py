@@ -3,7 +3,7 @@
 import argparse
 import os
 
-from src.bots.bot import init_bot
+from friend_boat.bots.bot import init_bot
 
 parser = argparse.ArgumentParser(prog="FriendBoat", description="A simple music bot for Discord")
 parser.add_argument("--discord-token", type=str, help="your Discord Bot Token", required=False)
