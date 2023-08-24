@@ -31,7 +31,8 @@ class MusicQueueItem:
         return self._embeds
 
     async def get_player(self) -> PCMVolumeTransformer:
-        return await self.player_service.get_player(self.music)
+        source = await self.player_service.get_source(self.music)
+        return await self.player_service.get_player(source)
 
 
 class MusicQueueItemEmbeds:
