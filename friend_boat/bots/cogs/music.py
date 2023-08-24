@@ -100,7 +100,32 @@ class Music(DiscordCogBase):
             await ctx.respond("Sorry, the queue is currently full", ephemeral=True)
 
     @require_server_presence()
-    @slash_command(description="Skip the current Youtube video and go to the next one")
+    @slash_command(description="Pause the current track")
+    async def pause(self, ctx: ApplicationContext):
+        player_service = player_service_by_guild[ctx.guild_id]
+        if not player_service.currently_playing:
+            await ctx.respond("Nothing is currently playing", ephemeral=True)
+        else:
+            if player_service.is_paused:
+                await player_service.pause()
+                await ctx.respond("Paused playback", ephemeral=True)
+            else:
+                await ctx.respond(
+                    'Playback was already paused. To resume playing, use the "/resume" command', ephemeral=True
+                )
+
+    @require_server_presence()
+    @slash_command(description="Resume the current track, if paused")
+    async def resume(self, ctx: ApplicationContext):
+        player_service = player_service_by_guild[ctx.guild_id]
+        if not player_service.currently_playing:
+            await ctx.respond("Nothing is currently playing", ephemeral=True)
+        else:
+            await player_service.resume()
+            await ctx.respond("Resumed playback", ephemeral=True)
+
+    @require_server_presence()
+    @slash_command(description="Skip the current track")
     async def skip(self, ctx: ApplicationContext):
         player_service = player_service_by_guild[ctx.guild_id]
         async with ctx.typing():
@@ -109,7 +134,7 @@ class Music(DiscordCogBase):
         await ctx.respond("Skipped", ephemeral=True)
 
     @require_server_presence()
-    @slash_command(description="Stop playing the current Youtube video and clear the queue")
+    @slash_command(description="Stop playing the current track and clear the queue")
     async def stop(self, ctx: ApplicationContext):
         if ctx.guild_id not in player_service_by_guild:
             return await ctx.respond("Nothing is currently playing", ephemeral=True)
@@ -119,7 +144,45 @@ class Music(DiscordCogBase):
             await player_service.stop()
             del player_service_by_guild[ctx.guild_id]
 
-        await ctx.respond("Stopped playback and cleared queue", ephemeral=True)
+        await ctx.respond("Stopped playback and cleared the queue", ephemeral=True)
+
+    @require_server_presence()
+    @slash_command(description="Restart the current track")
+    async def restart(self, ctx: ApplicationContext):
+        player_service = player_service_by_guild[ctx.guild_id]
+        if not player_service.currently_playing:
+            await ctx.respond("Nothing is currently playing", ephemeral=True)
+        else:
+            player_service.toggle_repeat_once(force_on=True)
+            await player_service.skip()
+            await ctx.respond("Restarted", ephemeral=True)
+
+    @require_server_presence()
+    @slash_command(description="Repeat the current track once after it ends")
+    async def toggle_repeat(self, ctx: ApplicationContext):
+        player_service = player_service_by_guild[ctx.guild_id]
+        if not player_service.currently_playing:
+            await ctx.respond("Nothing is currently playing", ephemeral=True)
+        else:
+            if player_service.toggle_repeat_once():
+                await ctx.respond("Okay, this track will be repeated once", ephemeral=True)
+            else:
+                await ctx.respond("Okay, this track won't repeat", ephemeral=True)
+
+    @require_server_presence()
+    @slash_command(description="Loop the current track forever (or at least until you all leave)")
+    async def toggle_repeat_forever(self, ctx: ApplicationContext):
+        player_service = player_service_by_guild[ctx.guild_id]
+        if not player_service.currently_playing:
+            await ctx.respond("Nothing is currently playing", ephemeral=True)
+        else:
+            if player_service.toggle_repeat_forever():
+                await ctx.respond(
+                    "Okay, this track will keep playing until everyone leaves, or this command is run again",
+                    ephemeral=True,
+                )
+            else:
+                await ctx.respond("Okay, this track won't repeat anymore", ephemeral=True)
 
     @require_server_presence()
     @slash_command(description="Shuffle the queue")
@@ -140,7 +203,8 @@ class Music(DiscordCogBase):
         if not player_service.currently_playing:
             await ctx.respond("Nothing is currently playing", ephemeral=True)
         else:
-            await ctx.respond("Now Playing:", embed=player_service.currently_playing.embeds.playing, ephemeral=True)
+            text = "Now Playing (Currently Paused):" if player_service.is_paused else "Now Playing:"
+            await ctx.respond(text, embed=player_service.currently_playing.embeds.playing, ephemeral=True)
 
     @require_server_presence()
     @slash_command(description="List everything coming up")
