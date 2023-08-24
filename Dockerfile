@@ -25,7 +25,6 @@ RUN apt-get update \
     && apt-get install --no-install-recommends -y \
     curl \
     build-essential \
-    ffmpeg \
     gnupg gnupg2 gnupg1
 
 # install poetry - respects $POETRY_VERSION & $POETRY_HOME
@@ -41,6 +40,10 @@ ENV TESTING=false
 
 ARG COMMIT
 ENV GIT_COMMIT_HASH=$COMMIT
+
+RUN apt-get update \
+    && apt-get install --no-install-recommends -y \
+    ffmpeg
 
 # copying poetry and venv into image
 COPY --from=builder-base $POETRY_HOME $POETRY_HOME
