@@ -14,7 +14,6 @@ from friend_boat.services._base import AudioStreamEffect
 class MusicQueueService:
     def __init__(self) -> None:
         settings = Settings()
-        self._embeds: MusicQueueEmbeds | None = None
 
         # queue
         self._queue: Queue[MusicQueueItem] = Queue()
@@ -43,7 +42,6 @@ class MusicQueueService:
     def _reset_state(self) -> None:
         self.clear()
 
-        self._embeds = None
         self._currently_playing = None
         self._hot_swap_currently_playing = None
         self._next_item_to_play = None
@@ -89,10 +87,11 @@ class MusicQueueService:
 
     @property
     def embeds(self) -> MusicQueueEmbeds:
-        if not self._embeds:
-            self._embeds = MusicQueueEmbeds(self._queue)  # TODO: this ignores the up-next item
+        queue_items = list(self._queue.queue)
+        if self._next_item_to_play:
+            queue_items.insert(0, self._next_item_to_play)
 
-        return self._embeds
+        return MusicQueueEmbeds(queue_items)
 
     async def start_playing(self, currently_playing_message: Message, voice_channel: VocalGuildChannel) -> None:
         """Start playing the queue"""
