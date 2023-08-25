@@ -8,7 +8,8 @@ from .settings import Settings
 
 
 def run_bot(bot: Bot) -> None:
-    bot.run()
+    settings = Settings()
+    bot.run(settings.discord_bot_token)
 
 
 def init_bot() -> Bot:

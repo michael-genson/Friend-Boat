@@ -6,33 +6,17 @@ from tempfile import TemporaryDirectory
 from typing import cast
 
 import yt_dlp  # type: ignore
-from discord import FFmpegPCMAudio, PCMVolumeTransformer
 from pyyoutube import Api, SearchListResponse, SearchResult, Video, VideoListResponse  # type: ignore
 
 from friend_boat.models._base import MusicItemBase
 from friend_boat.models.youtube import SearchType, YoutubeVideo
 
-from ._base import MusicPlayerServiceBase
+from ._base import AudioStream, AudioStreamEffect, MusicPlayerServiceBase
 
 youtube_video_id_pattern = re.compile(
     r"^(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com"
     r"\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})(?:\S+)?$"
 )
-
-
-class YTDLSource(PCMVolumeTransformer):
-    # https://github.com/Rapptz/discord.py/blob/master/examples/basic_voice.py
-
-    # Suppress noise about console usage from errors
-    yt_dlp.utils.bug_reports_message = lambda: ""
-
-    def __init__(self, source: FFmpegPCMAudio, *, data: dict, volume=0.5):
-        super().__init__(source, volume)
-
-        self.data = data
-
-        self.title = data.get("title")
-        self.url = data.get("url")
 
 
 class YouTubeService(MusicPlayerServiceBase):
@@ -59,46 +43,9 @@ class YouTubeService(MusicPlayerServiceBase):
         else:
             return matches[0][0]
 
-    def get_ytdl(self) -> yt_dlp.YoutubeDL:
-        return yt_dlp.YoutubeDL(
-            {
-                "format": "bestaudio/best",
-                "outtmpl": os.path.join(self._temp_dir, "%(extractor)s-%(id)s-%(title)s.%(ext)s"),
-                "restrictfilenames": True,
-                "noplaylist": True,
-                "nocheckcertificate": True,
-                "ignoreerrors": False,
-                "logtostderr": False,
-                "quiet": True,
-                "no_warnings": True,
-                "default_search": "auto",
-                "source_address": "0.0.0.0",  # bind to ipv4 since ipv6 addresses cause issues sometimes
-            }
-        )
-
     @staticmethod
     def build_url_from_video_id(video_id: str) -> str:
         return f"https://www.youtube.com/watch?v={video_id}"
-
-    async def build_ytdl_source(
-        self, video: YoutubeVideo, *, loop: asyncio.AbstractEventLoop | None = None, stream=False
-    ) -> YTDLSource:
-        if not loop:
-            loop = asyncio.get_event_loop()
-
-        ytdl = self.get_ytdl()
-        data: dict = await loop.run_in_executor(None, lambda: ytdl.extract_info(video.url, download=not stream))
-        if "entries" in data:
-            # take first item from a playlist
-            data = cast(dict, data["entries"][0])
-
-        pcm = FFmpegPCMAudio(
-            data["url"] if stream else ytdl.prepare_filename(data),
-            options="-vn",
-            # prevents early stream terminations (requires ffmpeg >= 3): https://github.com/Rapptz/discord.py/issues/315
-            before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
-        )
-        return YTDLSource(pcm, data=data)
 
     def search_video(self, query: str) -> YoutubeVideo | None:
         """Searches YouTube for a video using a query string and returns the URL of that video, if found"""
@@ -149,8 +96,54 @@ class YouTubeService(MusicPlayerServiceBase):
             original_query=query,
         )
 
-    async def get_player(self, item: MusicItemBase) -> PCMVolumeTransformer:
+    def get_ytdl(self) -> yt_dlp.YoutubeDL:
+        return yt_dlp.YoutubeDL(
+            {
+                "format": "bestaudio/best",
+                "outtmpl": os.path.join(self._temp_dir, "%(extractor)s-%(id)s-%(title)s.%(ext)s"),
+                "restrictfilenames": True,
+                "noplaylist": True,
+                "nocheckcertificate": True,
+                "ignoreerrors": False,
+                "logtostderr": False,
+                "quiet": True,
+                "no_warnings": True,
+                "default_search": "auto",
+                "source_address": "0.0.0.0",  # bind to ipv4 since ipv6 addresses cause issues sometimes
+            }
+        )
+
+    async def get_source(
+        self,
+        item: MusicItemBase,
+        *,
+        start_at: int = 0,
+        effect: AudioStreamEffect | None = None,
+    ) -> AudioStream:
         if not isinstance(item, YoutubeVideo):
             raise Exception("This service does not support this item")
 
-        return await self.build_ytdl_source(item, stream=True)
+        loop = asyncio.get_event_loop()
+        ytdl = self.get_ytdl()
+        data: dict = await loop.run_in_executor(None, lambda: ytdl.extract_info(item.url, download=False))
+        if "entries" in data:
+            # take first item from a playlist
+            data = cast(dict, data["entries"][0])
+
+        try:
+            bitrate = int(data["asr"])
+            if bitrate not in [44100, 48000]:
+                # it's probably wrong, so just use the default
+                bitrate = 48000
+        except (KeyError, TypeError, ValueError):
+            bitrate = 48000
+
+        return AudioStream(
+            data["url"],
+            bitrate=bitrate,
+            start_at=start_at,
+            effect=effect,
+            # prevents early stream terminations (requires ffmpeg >= 3): https://github.com/Rapptz/discord.py/issues/315
+            before_options={"-reconnect": "1", "-reconnect_streamed": "1", "-reconnect_delay_max": "5"},
+            options={"-vn": None, "-segment_time": "10"},
+        )
