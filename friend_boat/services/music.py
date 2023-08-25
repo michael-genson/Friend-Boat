@@ -33,6 +33,7 @@ class MusicQueueService:
         self._voice_client: VoiceClient | None = None
         """The voice client we are connected to while playing"""
 
+        self._applied_effect: AudioStreamEffect | None = None
         self._repeat_once: bool = False
         self._repeat_forever: bool = False
 
@@ -44,6 +45,7 @@ class MusicQueueService:
         self._currently_playing_message = None
         self._voice_client = None
 
+        self._applied_effect = None
         self._repeat_once = False
         self._repeat_forever = False
 
@@ -127,6 +129,7 @@ class MusicQueueService:
         if not self._currently_playing or not (self._repeat_once or self._repeat_forever):
             try:
                 self._currently_playing = self._queue.get(block=False)
+                self._currently_playing.effect = self._applied_effect
             except Empty:
                 return await self.stop()
         if self._repeat_once:
@@ -141,8 +144,7 @@ class MusicQueueService:
     def clear(self) -> None:
         """Clear the queue"""
 
-        self._queue = Queue()  # TODO: actually clear the queue instead of making a new one
-        self._embeds = None  # TODO: this is unnecessary if we properly clear the queue
+        self._queue.queue.clear()
 
     async def pause(self) -> None:
         """Pauses playback"""
@@ -208,6 +210,7 @@ class MusicQueueService:
         if not (self._currently_playing and self._currently_playing.source):
             return
 
+        self._applied_effect = effect
         await self._trigger_hot_swap(
             MusicQueueItem(
                 player_service=self._currently_playing.player_service,

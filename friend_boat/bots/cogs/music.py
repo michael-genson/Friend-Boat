@@ -229,6 +229,18 @@ class Music(DiscordCogBase):
         player_service.shuffle()
         await ctx.respond("Queue shuffled", ephemeral=True)
 
+    ### Queue Controls ###
+
+    @require_server_presence()
+    @slash_command(description="Empty the queue without stopping the current track")
+    async def clear_queue(self, ctx: ApplicationContext):
+        player_service = player_service_by_guild[ctx.guild_id]
+        if not player_service.queue_size:
+            return await ctx.respond("Nothing is currently queued", ephemeral=True)
+
+        player_service.clear()
+        await ctx.respond("Queue cleared")
+
     @require_server_presence()
     @slash_command(description="Apply an audio effect to the currently playing song")
     async def apply_effect(
@@ -238,7 +250,6 @@ class Music(DiscordCogBase):
             str, choices=[e.value for e in AudioStreamEffect], description="Choose your effect"
         ),
     ):
-        # TODO: make this persist for all songs until toggled off
         player_service = player_service_by_guild[ctx.guild_id]
         if not player_service.currently_playing:
             return await ctx.respond("Nothing is currently playing", ephemeral=True)
@@ -253,8 +264,6 @@ class Music(DiscordCogBase):
             return await ctx.respond("Effect cleared", ephemeral=True)
         else:
             return await ctx.respond("Effect applied", ephemeral=True)
-
-    ### Status ###
 
     @require_server_presence()
     @slash_command(description="Show what's currently playing")

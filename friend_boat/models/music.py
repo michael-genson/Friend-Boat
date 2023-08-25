@@ -97,7 +97,7 @@ class MusicQueueEmbeds:
 
     def _build_queue_item_page(self, items: list[MusicQueueItem]) -> Embed:
         return Embed(
-            title="Up Next",
+            title="Up Next" if len(items) == 1 else f"Up Next ({len(items)} items queued)",
             description="\n---\n".join([self._build_queue_item_text(item) for item in items]),
         )
 
