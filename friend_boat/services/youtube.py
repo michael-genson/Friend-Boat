@@ -11,7 +11,7 @@ from pyyoutube import Api, SearchListResponse, SearchResult, Video, VideoListRes
 from friend_boat.models._base import MusicItemBase
 from friend_boat.models.youtube import SearchType, YoutubeVideo
 
-from ._base import AudioStream, MusicPlayerServiceBase
+from ._base import AudioStream, AudioStreamEffect, MusicPlayerServiceBase
 
 youtube_video_id_pattern = re.compile(
     r"^(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com"
@@ -113,7 +113,13 @@ class YouTubeService(MusicPlayerServiceBase):
             }
         )
 
-    async def get_source(self, item: MusicItemBase, *, start_at: int = 0) -> AudioStream:
+    async def get_source(
+        self,
+        item: MusicItemBase,
+        *,
+        start_at: int = 0,
+        effect: AudioStreamEffect | None = None,
+    ) -> AudioStream:
         if not isinstance(item, YoutubeVideo):
             raise Exception("This service does not support this item")
 
@@ -124,10 +130,20 @@ class YouTubeService(MusicPlayerServiceBase):
             # take first item from a playlist
             data = cast(dict, data["entries"][0])
 
+        try:
+            bitrate = int(data["asr"])
+            if bitrate not in [44100, 48000]:
+                # it's probably wrong, so just use the default
+                bitrate = 48000
+        except (KeyError, TypeError, ValueError):
+            bitrate = 48000
+
         return AudioStream(
             data["url"],
+            bitrate=bitrate,
             start_at=start_at,
-            options={"-vn": None},
+            effect=effect,
             # prevents early stream terminations (requires ffmpeg >= 3): https://github.com/Rapptz/discord.py/issues/315
             before_options={"-reconnect": "1", "-reconnect_streamed": "1", "-reconnect_delay_max": "5"},
+            options={"-vn": None, "-segment_time": "10"},
         )

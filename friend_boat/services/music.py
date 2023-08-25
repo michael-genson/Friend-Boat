@@ -8,6 +8,7 @@ from discord.channel import VocalGuildChannel
 
 from friend_boat.bots.settings import Settings
 from friend_boat.models.music import MusicQueueEmbeds, MusicQueueFullError, MusicQueueItem
+from friend_boat.services._base import AudioStreamEffect
 
 
 class MusicQueueService:
@@ -101,7 +102,7 @@ class MusicQueueService:
             await self.skip()
 
     async def _start_voice_client(self, item: MusicQueueItem, client: VoiceClient) -> None:
-        player = await item.get_player()
+        player = await item.load_player()
         loop = asyncio.get_event_loop()
         client.play(player, after=lambda ex: asyncio.run_coroutine_threadsafe(self._play_next(ex), loop))
 
@@ -110,9 +111,10 @@ class MusicQueueService:
             return
 
         self._hot_swap_currently_playing = new_item
+        await self._hot_swap_currently_playing.load_player()  # pre-load the player so it's ready faster
         self._voice_client.stop()
 
-    async def _play_next(self, ex: Exception | None = None) -> None:
+    async def _play_next(self, _: Exception | None = None) -> None:
         if not (self._voice_client and self._voice_client.is_connected()):
             return await self.stop()
 
@@ -166,11 +168,13 @@ class MusicQueueService:
             return
 
         await self._trigger_hot_swap(
+            # TODO: make this reconstruction an instance method on the queue item
             MusicQueueItem(
-                self._currently_playing.player_service,
-                self._currently_playing.music,
-                self._currently_playing.requestor,
-                self._currently_playing.position + interval,
+                player_service=self._currently_playing.player_service,
+                music=self._currently_playing.music,
+                requestor=self._currently_playing.requestor,
+                start_at=self._currently_playing.position + interval,
+                effect=self._currently_playing.effect,
             )
         )
 
@@ -199,6 +203,21 @@ class MusicQueueService:
                 pass
 
         self._reset_state()
+
+    async def apply_effect(self, effect: AudioStreamEffect) -> None:
+        if not (self._currently_playing and self._currently_playing.source):
+            return
+
+        await self._trigger_hot_swap(
+            MusicQueueItem(
+                player_service=self._currently_playing.player_service,
+                music=self._currently_playing.music,
+                requestor=self._currently_playing.requestor,
+                source=self._currently_playing.source.apply_effect(effect),
+                start_at=self._currently_playing.position,
+                effect=effect,
+            )
+        )
 
     def add_to_queue(self, item: MusicQueueItem) -> None:
         """Puts an item into the queue. Raises a `MusicQueueFullError` if the queue is full"""

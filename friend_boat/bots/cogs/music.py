@@ -3,7 +3,7 @@ import random
 import traceback
 from collections import defaultdict
 
-from discord import ApplicationContext, Member, VoiceState, option, slash_command
+from discord import ApplicationContext, Member, Option, VoiceState, option, slash_command
 from discord.channel import VocalGuildChannel
 from discord.ext.commands import Cog
 
@@ -16,6 +16,7 @@ from friend_boat.models.bots import (
 from friend_boat.models.music import MusicQueueFullError, MusicQueueItem
 from friend_boat.models.paginator import SimplePaginator
 from friend_boat.models.youtube import NoResultsFoundError
+from friend_boat.services._base import AudioStreamEffect
 from friend_boat.services.music import MusicQueueService
 from friend_boat.services.youtube import YouTubeService
 
@@ -227,6 +228,31 @@ class Music(DiscordCogBase):
 
         player_service.shuffle()
         await ctx.respond("Queue shuffled", ephemeral=True)
+
+    @require_server_presence()
+    @slash_command(description="Apply an audio effect to the currently playing song")
+    async def apply_effect(
+        self,
+        ctx: ApplicationContext,
+        effect: Option(  # type: ignore[valid-type]
+            str, choices=[e.value for e in AudioStreamEffect], description="Choose your effect"
+        ),
+    ):
+        # TODO: make this persist for all songs until toggled off
+        player_service = player_service_by_guild[ctx.guild_id]
+        if not player_service.currently_playing:
+            return await ctx.respond("Nothing is currently playing", ephemeral=True)
+
+        try:
+            effect_val = AudioStreamEffect(effect)
+        except ValueError:
+            return await ctx.respond(f'Invalid effect "{effect}"', ephemeral=True)
+
+        await player_service.apply_effect(effect_val)
+        if effect_val is AudioStreamEffect.clear:
+            return await ctx.respond("Effect cleared", ephemeral=True)
+        else:
+            return await ctx.respond("Effect applied", ephemeral=True)
 
     ### Status ###
 

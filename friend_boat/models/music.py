@@ -8,7 +8,7 @@ from discord import Embed, Member, User
 from discord.ext.commands import CommandError
 
 from friend_boat.bots.settings import Settings
-from friend_boat.services._base import AudioPlayer, MusicPlayerServiceBase
+from friend_boat.services._base import AudioPlayer, AudioStream, AudioStreamEffect, MusicPlayerServiceBase
 
 from ._base import MusicItemBase
 
@@ -21,8 +21,12 @@ class MusicQueueItem:
     music: MusicItemBase
     requestor: Member | User
 
+    source: AudioStream | None = None
+    """The AudioStream source, if it already exists"""
     start_at: int = 0
     """When to start playback, in milliseconds"""
+
+    effect: AudioStreamEffect | None = None
 
     _embeds: MusicQueueItemEmbeds | None = None
     _player: AudioPlayer | None = None
@@ -40,12 +44,18 @@ class MusicQueueItem:
 
         return self._player.position if self._player else 0
 
-    async def get_player(self, start_at: int | None = None) -> AudioPlayer:
-        if start_at is None:
-            start_at = self.start_at
+    async def load_player(self, start_at: int | None = None, effect: AudioStreamEffect | None = None) -> AudioPlayer:
+        if not self._player:
+            if start_at is None:
+                start_at = self.start_at
+            if effect is None:
+                effect = self.effect
 
-        source = await self.player_service.get_source(self.music, start_at=self.start_at)
-        self._player = await self.player_service.get_player(source)
+            if not self.source:
+                self.source = await self.player_service.get_source(self.music, start_at=self.start_at, effect=effect)
+
+            self._player = await self.player_service.get_player(self.source)
+
         return self._player
 
 
