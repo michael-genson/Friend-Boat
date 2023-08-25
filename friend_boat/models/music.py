@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from queue import Queue
 from typing import Generator, TypeVar
 
 from discord import Embed, Member, User
@@ -83,8 +82,8 @@ class MusicQueueItemEmbeds:
 
 
 class MusicQueueEmbeds:
-    def __init__(self, queue: Queue[MusicQueueItem]) -> None:
-        self._music_queue = queue
+    def __init__(self, queue_items: list[MusicQueueItem]) -> None:
+        self._items = queue_items
 
     @staticmethod
     def chunk_list(list_: list[T], chunk_size: int) -> Generator[list[T], list[T], None]:
@@ -106,11 +105,9 @@ class MusicQueueEmbeds:
         """A list of embeds, each representing one page of queue items"""
 
         settings = Settings()
-
-        all_items: list[MusicQueueItem] = list(self._music_queue.queue)
         return [
             self._build_queue_item_page(chunk)
-            for chunk in self.chunk_list(all_items, settings.queue_paginator_page_size)
+            for chunk in self.chunk_list(self._items, settings.queue_paginator_page_size)
         ]
 
 
