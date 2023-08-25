@@ -127,7 +127,7 @@ class YouTubeService(MusicPlayerServiceBase):
         return AudioStream(
             data["url"],
             start_at=start_at,
-            options="-vn",
+            options={"-vn": None},
             # prevents early stream terminations (requires ffmpeg >= 3): https://github.com/Rapptz/discord.py/issues/315
-            before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
+            before_options={"-reconnect": "1", "-reconnect_streamed": "1", "-reconnect_delay_max": "5"},
         )

@@ -17,8 +17,8 @@ class AudioStream(FFmpegPCMAudio):
         executable: str = "ffmpeg",
         pipe: bool = False,
         stderr: IO[str] | None = None,
-        before_options: str | None = None,
-        options: str | None = None,
+        before_options: dict[str, str | None] | None = None,
+        options: dict[str, str | None] | None = None,
     ) -> None:
         """
         Wrapper around FFmpegPCMAudio to enable additional effects
@@ -26,17 +26,17 @@ class AudioStream(FFmpegPCMAudio):
         start_at: Time to start playback, in milliseconds
         """
 
-        before_options = before_options or ""
-
-        # inject start_at into before_options
+        before_options = before_options or {}
         if start_at:
-            if "-ss " in before_options or "-sse " in before_options:
-                start_at = 0
-            else:
-                before_options = f"-ss {start_at}ms " + before_options
+            before_options["-ss"] = f"{start_at}ms"
 
         super().__init__(
-            source, executable=executable, pipe=pipe, stderr=stderr, before_options=before_options, options=options
+            source,
+            executable=executable,
+            pipe=pipe,
+            stderr=stderr,
+            before_options=self._consolidate_options(before_options),
+            options=self._consolidate_options(options),
         )
 
         self._position: int = start_at
@@ -47,6 +47,22 @@ class AudioStream(FFmpegPCMAudio):
         """The playback position, in milliseconds"""
 
         return self._position
+
+    @staticmethod
+    def _consolidate_options(options: dict[str, str | None] | None) -> str:
+        """crude options builder"""
+
+        if not options:
+            return ""
+
+        options_strings: list[str] = []
+        for k, v in options.items():
+            if v is None:
+                options_strings.append(k)
+            else:
+                options_strings.extend([k, v])
+
+        return " ".join(options_strings)
 
     def read(self) -> bytes:
         self._position += 20  # reads are buffered in 20ms chunks
