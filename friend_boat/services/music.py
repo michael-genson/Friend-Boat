@@ -25,7 +25,10 @@ class MusicQueueService:
         """The music currently being played"""
 
         self._hot_swap_currently_playing: MusicQueueItem | None = None
-        """The music to play immediately after the current track stops"""
+        """The music to play immediately after the current item stops"""
+
+        self._next_item_to_play: MusicQueueItem | None = None
+        """The next item to play, ignoring the queue"""
 
         self._currently_playing_message: Message | None = None
         """The message showing the currently playing item"""
@@ -42,6 +45,8 @@ class MusicQueueService:
 
         self._embeds = None
         self._currently_playing = None
+        self._hot_swap_currently_playing = None
+        self._next_item_to_play = None
         self._currently_playing_message = None
         self._voice_client = None
 
@@ -85,7 +90,7 @@ class MusicQueueService:
     @property
     def embeds(self) -> MusicQueueEmbeds:
         if not self._embeds:
-            self._embeds = MusicQueueEmbeds(self._queue)
+            self._embeds = MusicQueueEmbeds(self._queue)  # TODO: this ignores the up-next item
 
         return self._embeds
 
@@ -128,8 +133,9 @@ class MusicQueueService:
 
         if not self._currently_playing or not (self._repeat_once or self._repeat_forever):
             try:
-                self._currently_playing = self._queue.get(block=False)
+                self._currently_playing = self._next_item_to_play or self._queue.get(block=False)
                 self._currently_playing.effect = self._applied_effect
+                self._next_item_to_play = None
             except Empty:
                 return await self.stop()
         if self._repeat_once:
@@ -179,6 +185,11 @@ class MusicQueueService:
                 effect=self._currently_playing.effect,
             )
         )
+
+    def set_next_item(self, item: MusicQueueItem) -> None:
+        """Set the next item to be played, ignoring the queue"""
+
+        self._next_item_to_play = item
 
     async def skip(self) -> None:
         """Ends the current item and proceeds to the next one"""

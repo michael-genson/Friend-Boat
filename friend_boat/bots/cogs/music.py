@@ -52,7 +52,8 @@ class Music(DiscordCogBase):
     )
     @option("query", description="a YouTube Video URL or search query")
     @option("skip_ahead", description="how far to skip ahead when starting playback, in seconds")
-    async def play(self, ctx: ApplicationContext, query: str, skip_ahead: int = 0):
+    @option("play_immediately", description="play immediately after the current track, bypassing the queue")
+    async def play(self, ctx: ApplicationContext, query: str, skip_ahead: int = 0, play_immediately: bool = False):
         if skip_ahead < 0:
             skip_ahead = 0
 
@@ -89,7 +90,10 @@ class Music(DiscordCogBase):
 
         # queue up the youtube video and start playback if nothing else is playing
         player_service = player_service_by_guild[ctx.guild.id]
-        player_service.add_to_queue(music_item)
+        if play_immediately:
+            player_service.set_next_item(music_item)
+        else:
+            player_service.add_to_queue(music_item)
 
         if not player_service.currently_playing:
             currently_playing_message = await ctx.send("Initializing...")
