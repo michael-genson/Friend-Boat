@@ -238,7 +238,6 @@ class Music(DiscordCogBase):
             str, choices=[e.value for e in AudioStreamEffect], description="Choose your effect"
         ),
     ):
-        # TODO: make this persist for all songs until toggled off
         player_service = player_service_by_guild[ctx.guild_id]
         if not player_service.currently_playing:
             return await ctx.respond("Nothing is currently playing", ephemeral=True)
