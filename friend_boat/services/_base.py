@@ -16,6 +16,8 @@ class AudioStreamEffect(Enum):
     void = "void"
     space_odyssey = "space odyssey"
     dark_brandon = "dark brandon"
+    demonic = "demonic"
+    schizo = "schizophrenia"
 
 
 class AudioStream(FFmpegPCMAudio):
@@ -61,6 +63,7 @@ class AudioStream(FFmpegPCMAudio):
 
         options.pop("-af", None)
         options.pop("-filter_complex", None)
+        options.pop("-map", None)
         if effect and effect is not AudioStreamEffect.clear:
             if effect is AudioStreamEffect.chipmunk:
                 options["-af"] = f"atempo=1/2,asetrate={bitrate}*2/1"
@@ -70,11 +73,26 @@ class AudioStream(FFmpegPCMAudio):
                 options["-af"] = f"asetrate={bitrate}*1/2,atempo=2/1"
             elif effect is AudioStreamEffect.space_odyssey:
                 options["-filter_complex"] = "aphaser=in_gain=0.3:out_gain=0.6:delay=3.0:decay=0.9:speed=0.75:type=t"
+            elif effect is AudioStreamEffect.demonic:
+                options["-filter_complex"] = (
+                    f"[0:a:0]atempo=1/1[normal];"
+                    f"[0:a:0]atempo=0.707107,asetrate={bitrate}*1.414213[transposeup];"
+                    f"[0:a:0]asetrate={bitrate}*1/2,atempo=2/1[transposedown];"
+                    f"[normal][transposeup][transposedown]amix=inputs=3[a]"
+                )
+                options["-map"] = "[a]"
             elif effect is AudioStreamEffect.dark_brandon:
                 options["-filter_complex"] = (
                     f"aphaser=in_gain=0.3:out_gain=0.6:delay=3.0:decay=0.9:speed=0.75:type=t,"
                     f"asetrate={bitrate}*3/4,atempo=5/4"
                 )
+            elif effect is AudioStreamEffect.schizo:
+                options["-filter_complex"] = (
+                    "[0:a:0]channelsplit=channel_layout=mono[left];"
+                    "[0:a:0]areverse,channelsplit=channel_layout=mono[right];"
+                    "[left][right]join=inputs=2:channel_layout=stereo[a]"
+                )
+                options["-map"] = "[a]"
 
         super().__init__(
             source,
