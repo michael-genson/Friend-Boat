@@ -16,3 +16,8 @@ class General(DiscordCogBase):
     async def sync(self, ctx: ApplicationContext):
         if isinstance(ctx.author, Member):
             await self.bot.sync_commands(force=True, guild_ids=[ctx.author.guild.id])
+
+    @command()
+    @is_owner()
+    async def force_shutdown(self, ctx: ApplicationContext):
+        exit()
