@@ -290,3 +290,16 @@ class Music(DiscordCogBase):
         settings = Settings()
         await ctx.respond("Here's what's up next:")
         await SimplePaginator(timeout=settings.queue_paginator_timeout).start(ctx, pages=pages)
+
+    ### Custom Commands ###
+
+    @require_server_presence()
+    @slash_command(description="|: ♪ 𝄾 𝄾 ♪ 𝄾 𝄾 ♪ 𝄾 ♪ 𝄾 :|")
+    async def stealth(self, ctx: ApplicationContext):
+        stealth_url = "https://www.youtube.com/watch?v=soXQiu5Nrn4"
+
+        player_service = self.get_queue_service(ctx.guild_id)
+        player_service.clear()
+
+        await self.play(ctx, query=stealth_url)
+        player_service.toggle_repeat_forever(force_on=True)
