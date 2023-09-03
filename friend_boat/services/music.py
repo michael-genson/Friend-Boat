@@ -3,7 +3,7 @@ import random
 from queue import Empty, Queue
 from typing import cast
 
-from discord import Message, VoiceClient
+from discord import Bot, Message, VoiceClient
 from discord.channel import VocalGuildChannel
 
 from friend_boat.bots.settings import Settings
@@ -12,7 +12,10 @@ from friend_boat.services._base import AudioStreamEffect
 
 
 class MusicQueueService:
-    def __init__(self) -> None:
+    def __init__(self, bot: Bot, guild_id: int) -> None:
+        self.bot = bot
+        self.guild_id = guild_id
+
         settings = Settings()
 
         # queue
@@ -32,12 +35,19 @@ class MusicQueueService:
         self._currently_playing_message: Message | None = None
         """The message showing the currently playing item"""
 
-        self._voice_client: VoiceClient | None = None
-        """The voice client we are connected to while playing"""
-
         self._applied_effect: AudioStreamEffect | None = None
         self._repeat_once: bool = False
         self._repeat_forever: bool = False
+
+    def _get_voice_client(self) -> VoiceClient | None:
+        guild = self.bot.get_guild(self.guild_id)
+        if not guild:
+            return None
+        else:
+            if isinstance(guild.voice_client, VoiceClient):
+                return guild.voice_client
+            else:
+                return None
 
     def _reset_state(self) -> None:
         self.clear()
@@ -46,7 +56,6 @@ class MusicQueueService:
         self._hot_swap_currently_playing = None
         self._next_item_to_play = None
         self._currently_playing_message = None
-        self._voice_client = None
 
         self._applied_effect = None
         self._repeat_once = False
@@ -64,26 +73,29 @@ class MusicQueueService:
     def is_alone(self) -> bool:
         """Whether or not the bot is in a channel by itself"""
 
-        if not (self._voice_client and self._voice_client.is_connected()):
+        voice_client = self._get_voice_client()
+        if not (voice_client and voice_client.is_connected()):
             # not in a voice channel
             return False
 
-        current_channel = cast(VocalGuildChannel, self._voice_client.channel)
+        current_channel = cast(VocalGuildChannel, voice_client.channel)
         return len(current_channel.members) <= 1
 
     @property
     def is_paused(self) -> bool:
-        if not self._voice_client:
+        voice_client = self._get_voice_client()
+        if not voice_client:
             return False
 
-        return self._voice_client.is_paused()
+        return voice_client.is_paused()
 
     @property
     def current_voice_channel_id(self) -> int | None:
-        if not self._voice_client:
+        voice_client = self._get_voice_client()
+        if not voice_client:
             return None
         else:
-            return self._voice_client.channel.id  # type: ignore [attr-defined]
+            return voice_client.channel.id  # type: ignore [attr-defined]
 
     @property
     def embeds(self) -> MusicQueueEmbeds:
@@ -103,7 +115,12 @@ class MusicQueueService:
     async def switch_voice_channel(self, new_channel: VocalGuildChannel, skip_current=True) -> None:
         """Switch to a new voice channel. Optionally skip what is currently playing"""
 
-        self._voice_client = await new_channel.connect()
+        voice_client = self._get_voice_client()
+        if voice_client and voice_client.is_connected():
+            await voice_client.move_to(new_channel)
+        else:
+            await new_channel.connect()
+
         if skip_current and self._currently_playing:
             await self.skip()
 
@@ -113,34 +130,40 @@ class MusicQueueService:
         client.play(player, after=lambda ex: asyncio.run_coroutine_threadsafe(self._play_next(ex), loop))
 
     async def _trigger_hot_swap(self, new_item: MusicQueueItem) -> None:
-        if not (self._voice_client and self._voice_client.is_connected()):
+        voice_client = self._get_voice_client()
+        if not (voice_client and voice_client.is_connected()):
             return
 
         self._hot_swap_currently_playing = new_item
         await self._hot_swap_currently_playing.load_player()  # pre-load the player so it's ready faster
-        self._voice_client.stop()
+        voice_client.stop()
 
-    async def _play_next(self, _: Exception | None = None) -> None:
-        if not (self._voice_client and self._voice_client.is_connected()):
+    async def _play_next(self, ex: Exception | None = None) -> None:
+        if ex:
+            raise
+
+        voice_client = self._get_voice_client()
+        if not (voice_client and voice_client.is_connected()):
             return await self.stop()
+
+        if self._currently_playing and (self._repeat_once or self._repeat_forever):
+            self._next_item_to_play = self._currently_playing.copy(start_at=0)
+            self._repeat_once = False
 
         if self._hot_swap_currently_playing:
             # short circuit the play logic and immediately engage the hot swap item
             self._currently_playing = self._hot_swap_currently_playing
             self._hot_swap_currently_playing = None
-            return await self._start_voice_client(self._currently_playing, self._voice_client)
+            return await self._start_voice_client(self._currently_playing, voice_client)
 
-        if not self._currently_playing or not (self._repeat_once or self._repeat_forever):
-            try:
-                self._currently_playing = self._next_item_to_play or self._queue.get(block=False)
-                self._currently_playing.effect = self._applied_effect
-                self._next_item_to_play = None
-            except Empty:
-                return await self.stop()
-        if self._repeat_once:
-            self._repeat_once = False
+        try:
+            self._currently_playing = self._next_item_to_play or self._queue.get(block=False)
+            self._currently_playing.effect = self._applied_effect
+            self._next_item_to_play = None
+        except Empty:
+            return await self.stop()
 
-        await self._start_voice_client(self._currently_playing, self._voice_client)
+        await self._start_voice_client(self._currently_playing, voice_client)
         if self._currently_playing_message:
             await self._currently_playing_message.edit(
                 content="Now Playing:", embed=self._currently_playing.embeds.playing
@@ -154,14 +177,16 @@ class MusicQueueService:
     async def pause(self) -> None:
         """Pauses playback"""
 
-        if self._voice_client and self._voice_client.is_playing():
-            self._voice_client.pause()
+        voice_client = self._get_voice_client()
+        if voice_client and voice_client.is_playing():
+            voice_client.pause()
 
     async def resume(self) -> None:
         """Resumes playback, if paused"""
 
-        if self._voice_client and self._voice_client.is_paused():
-            self._voice_client.resume()
+        voice_client = self._get_voice_client()
+        if voice_client and voice_client.is_paused():
+            voice_client.resume()
 
     async def seek(self, interval: int) -> None:
         """
@@ -174,16 +199,7 @@ class MusicQueueService:
         if not self._currently_playing:
             return
 
-        await self._trigger_hot_swap(
-            # TODO: make this reconstruction an instance method on the queue item
-            MusicQueueItem(
-                player_service=self._currently_playing.player_service,
-                music=self._currently_playing.music,
-                requestor=self._currently_playing.requestor,
-                start_at=self._currently_playing.position + interval,
-                effect=self._currently_playing.effect,
-            )
-        )
+        await self._trigger_hot_swap(self._currently_playing.copy(start_at=self._currently_playing.position + interval))
 
     def set_next_item(self, item: MusicQueueItem) -> None:
         """Set the next item to be played, ignoring the queue"""
@@ -195,16 +211,19 @@ class MusicQueueService:
 
         self._repeat_once = False
         self._repeat_forever = False
-        if self._voice_client and self._voice_client.is_playing():
-            self._voice_client.stop()
+
+        voice_client = self._get_voice_client()
+        if voice_client and voice_client.is_playing():
+            voice_client.stop()
 
     async def stop(self) -> None:
-        if self._voice_client:
+        voice_client = self._get_voice_client()
+        if voice_client:
             try:
-                if self._voice_client.is_playing():
-                    self._voice_client.stop()
-                if self._voice_client.is_connected():
-                    await self._voice_client.disconnect()
+                if voice_client.is_playing():
+                    voice_client.stop()
+                if voice_client.is_connected():
+                    await voice_client.disconnect()
             except Exception:
                 pass
 
@@ -221,15 +240,9 @@ class MusicQueueService:
             return
 
         self._applied_effect = effect
+        # TODO: passing the effect twice is redundant, we should fix the API so we can pass it just once
         await self._trigger_hot_swap(
-            MusicQueueItem(
-                player_service=self._currently_playing.player_service,
-                music=self._currently_playing.music,
-                requestor=self._currently_playing.requestor,
-                source=self._currently_playing.source.apply_effect(effect),
-                start_at=self._currently_playing.position,
-                effect=effect,
-            )
+            self._currently_playing.copy(source=self._currently_playing.source.apply_effect(effect), effect=effect)
         )
 
     def add_to_queue(self, item: MusicQueueItem) -> None:

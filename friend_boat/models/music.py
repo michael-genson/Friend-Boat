@@ -57,6 +57,14 @@ class MusicQueueItem:
 
         return self._player
 
+    def copy(self, **kwargs) -> MusicQueueItem:
+        attrs = {
+            k: kwargs[k] if k in kwargs else getattr(self, k)
+            for k in ["player_service", "music", "requestor", "start_at", "effect"]
+        }
+
+        return MusicQueueItem(**attrs)
+
 
 class MusicQueueItemEmbeds:
     def __init__(self, item: MusicItemBase, author: Member | User) -> None:
