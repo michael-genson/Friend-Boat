@@ -45,13 +45,15 @@ class MusicQueueItem:
 
     async def load_player(self, start_at: int | None = None, effect: AudioStreamEffect | None = None) -> AudioPlayer:
         if not self._player:
-            if start_at is None:
-                start_at = self.start_at
-            if effect is None:
-                effect = self.effect
+            if start_at is not None:
+                self.start_at = start_at
+            if effect is not None:
+                self.effect = effect
 
             if not self.source:
-                self.source = await self.player_service.get_source(self.music, start_at=self.start_at, effect=effect)
+                self.source = await self.player_service.get_source(
+                    self.music, start_at=self.start_at, effect=self.effect
+                )
 
             self._player = await self.player_service.get_player(self.source)
 
