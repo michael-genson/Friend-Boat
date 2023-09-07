@@ -129,13 +129,18 @@ class MusicQueueService:
         loop = asyncio.get_event_loop()
         client.play(player, after=lambda ex: asyncio.run_coroutine_threadsafe(self._play_next(ex), loop))
 
-    async def _trigger_hot_swap(self, new_item: MusicQueueItem) -> None:
+    async def _trigger_hot_swap(self, old_item: MusicQueueItem, *, timeskip: int | None = None, **kwargs) -> None:
         voice_client = self._get_voice_client()
         if not (voice_client and voice_client.is_connected()):
             return
 
-        self._hot_swap_currently_playing = new_item
-        await self._hot_swap_currently_playing.load_player()  # pre-load the player so it's ready faster
+        self._hot_swap_currently_playing = old_item.copy(**kwargs)
+
+        # pre-load the player so it's ready faster
+        if timeskip is None:
+            timeskip = 1000  # hot-swapping takes about a second, so this makes the transition more seamless
+
+        await self._hot_swap_currently_playing.load_player(start_at=old_item.position + timeskip)
         voice_client.stop()
 
     async def _play_next(self, ex: Exception | None = None) -> None:
@@ -199,7 +204,7 @@ class MusicQueueService:
         if not self._currently_playing:
             return
 
-        await self._trigger_hot_swap(self._currently_playing.copy(start_at=self._currently_playing.position + interval))
+        await self._trigger_hot_swap(self._currently_playing, timeskip=self._currently_playing.position + interval)
 
     def set_next_item(self, item: MusicQueueItem) -> None:
         """Set the next item to be played, ignoring the queue"""
@@ -242,7 +247,7 @@ class MusicQueueService:
         self._applied_effect = effect
         # TODO: passing the effect twice is redundant, we should fix the API so we can pass it just once
         await self._trigger_hot_swap(
-            self._currently_playing.copy(source=self._currently_playing.source.apply_effect(effect), effect=effect)
+            self._currently_playing, source=self._currently_playing.source.apply_effect(effect), effect=effect
         )
 
     def add_to_queue(self, item: MusicQueueItem) -> None:
