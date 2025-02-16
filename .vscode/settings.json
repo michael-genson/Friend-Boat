@@ -1,26 +1,7 @@
 {
-  "python.linting.pylintEnabled": true,
-  "python.linting.enabled": true,
-  "python.linting.mypyArgs": [
-    "--follow-imports=silent",
-    "--show-column-numbers",
-    "--disallow-untyped-defs",
-    "--disallow-untyped-calls",
-  ],
-  "python.linting.pylintArgs": [
-    "--enable=W0614"
-  ],
   "explorer.fileNesting.enabled": true,
   "python.analysis.extraPaths": [
     "friend_boat"
-  ],
-  "python.formatting.provider": "black",
-  "isort.args": [
-    "--profile",
-    "black"
-  ],
-  "python.linting.ignorePatterns": [
-    "tmp/*"
   ],
   "explorer.fileNesting.patterns": {
     "package.json": "package-lock.json, yarn.lock, .eslintrc.js, tsconfig.json, .prettierrc, .editorconfig",
@@ -29,14 +10,9 @@
     "Dockerfile": "Dockerfile, .dockerignore, docker-compose.dev.yml, docker-compose.yml, docker_entry.sh",
     "README.md": "LICENSE, SECURITY.md"
   },
-  "editor.formatOnSave": true,
-  "editor.defaultFormatter": "ms-python.python",
   "[python]": {
     "editor.formatOnSave": true,
-    "editor.defaultFormatter": "ms-python.black-formatter",
-    "editor.codeActionsOnSave": {
-      "source.organizeImports": "explicit"
-    },
+    "editor.defaultFormatter": "charliermarsh.ruff",
   },
   "emmet.includeLanguages": {
     "jinja-html": "html"
