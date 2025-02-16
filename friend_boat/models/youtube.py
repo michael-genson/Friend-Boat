@@ -11,8 +11,7 @@ class SearchType(Enum):
     video = "video"
 
 
-class YoutubeVideo(MusicItemBase):
-    ...
+class YoutubeVideo(MusicItemBase): ...
 
 
 class NoResultsFoundError(CommandError):

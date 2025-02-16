@@ -9,7 +9,7 @@
             // Update 'VARIANT' to pick a Python version: 3, 3.9, 3.8, 3.7, 3.6.
             // Append -bullseye or -buster to pin to an OS version.
             // Use -bullseye variants on local on arm64/Apple Silicon.
-            "VARIANT": "3.11-bullseye",
+            "VARIANT": "3.12-bullseye",
             // Options
             "NODE_VERSION": "lts/*"
         }
@@ -33,7 +33,6 @@
                 "python.linting.enabled": true,
                 "python.linting.pylintEnabled": true,
                 "python.formatting.autopep8Path": "/usr/local/py-utils/bin/autopep8",
-                "python.formatting.blackPath": "/usr/local/py-utils/bin/black",
                 "python.formatting.yapfPath": "/usr/local/py-utils/bin/yapf",
                 "python.linting.banditPath": "/usr/local/py-utils/bin/bandit",
                 "python.linting.flake8Path": "/usr/local/py-utils/bin/flake8",
@@ -49,7 +48,6 @@
                 "ms-python.python",
                 "ms-python.vscode-pylance",
                 "matangover.mypy",
-                "ms-python.black-formatter",
                 "samuelcolvin.jinjahtml",
                 "streetsidesoftware.code-spell-checker"
             ]
@@ -76,7 +74,7 @@
         "poetry",
         "install"
     ],
-	"postCreateCommand": [
+    "postCreateCommand": [
         "pre-commit",
         "install"
     ],

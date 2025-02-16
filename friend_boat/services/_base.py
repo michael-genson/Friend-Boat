@@ -154,8 +154,7 @@ class MusicPlayerServiceBase(ABC):
     @abstractmethod
     async def get_source(
         self, item: MusicItemBase, *, start_at: int = 0, effect: AudioStreamEffect | None = None
-    ) -> AudioStream:
-        ...
+    ) -> AudioStream: ...
 
     async def get_player(self, source: AudioStream) -> AudioPlayer:
         return AudioPlayer(source)
