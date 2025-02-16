@@ -49,7 +49,7 @@ jobs:
 
       - name: Lint (Ruff)
         run: |
-          poetry run ruff friend_boat
+          poetry run ruff check friend_boat
 
       - name: Mypy
         run: |
