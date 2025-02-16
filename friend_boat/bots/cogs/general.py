@@ -9,7 +9,7 @@ class General(DiscordCogBase):
     async def ping(self, ctx: ApplicationContext):
         """Ping me!"""
 
-        await ctx.respond(f"Pong! ({self.bot.latency*100:.2f}ms)")
+        await ctx.respond(f"Pong! ({self.bot.latency * 100:.2f}ms)")
 
     @command()
     @is_owner()
