@@ -19,7 +19,7 @@ ruff = "^0.13.2"
 mypy = "^1.18.2"
 pre-commit = "^4.3.0"
 pytest-cov = "^7.0.0"
-bump-my-version = "^0.32.1"
+bump-my-version = "^1.2.3"
 
 [tool.isort]
 line_length = 120
@@ -28,3 +28,12 @@ line_length = 120
 extend-exclude = ["deploy/*", "tests/*"]
 line-length = 120
 target-version = "py312"
+
+[tool.bumpversion]
+commit = true
+tag = true
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+search = 'version = "{current_version}"'
+replace = 'version = "{new_version}"'

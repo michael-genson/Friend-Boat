@@ -202,18 +202,18 @@ files = [
 
 [[package]]
 name = "bump-my-version"
-version = "0.32.2"
+version = "1.2.3"
 description = "Version bump your Python project"
 optional = false
 python-versions = ">=3.8"
 groups = ["dev"]
 files = [
-    {file = "bump_my_version-0.32.2-py3-none-any.whl", hash = "sha256:fb93c5a70a2368354bcac4457d22f282dc66a7bd241241f5a4e3d49002dece36"},
-    {file = "bump_my_version-0.32.2.tar.gz", hash = "sha256:fc1c686af66c39c44d2f19c4d29597fcc2f938bc19046b8df26bfa44c93f11c0"},
+    {file = "bump_my_version-1.2.3-py3-none-any.whl", hash = "sha256:620eac65828c86e60c6a9becf9eadc376181e81b47c0097a7b63e113b5cb256f"},
+    {file = "bump_my_version-1.2.3.tar.gz", hash = "sha256:7352af6f9454469a020493c2747cd7c88b0c7017dd216e3abb270a13745afa1b"},
 ]
 
 [package.dependencies]
-click = "*"
+click = "<8.3"
 httpx = ">=0.28.1"
 pydantic = ">=2.0.0"
 pydantic-settings = "*"
@@ -436,14 +436,14 @@ files = [
 
 [[package]]
 name = "click"
-version = "8.3.0"
+version = "8.2.1"
 description = "Composable command line interface toolkit"
 optional = false
 python-versions = ">=3.10"
 groups = ["dev"]
 files = [
-    {file = "click-8.3.0-py3-none-any.whl", hash = "sha256:9b9f285302c6e3064f4330c05f05b81945b2a39544279343e6e7c5f27a9baddc"},
-    {file = "click-8.3.0.tar.gz", hash = "sha256:e7b8232224eba16f4ebe410c25ced9f7875cb5f3263ffc93cc3e8da705e229c4"},
+    {file = "click-8.2.1-py3-none-any.whl", hash = "sha256:61a3265b914e850b85317d0b3109c7f8cd35a670f963866005d6ef1d5175a12b"},
+    {file = "click-8.2.1.tar.gz", hash = "sha256:27c491cc05d968d271d5a1db13e3b5a184636d9d930f148c50b038f0d0646202"},
 ]
 
 [package.dependencies]
@@ -2146,4 +2146,4 @@ test = ["pytest (>=8.1,<9.0)", "pytest-rerunfailures (>=14.0,<15.0)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "120959adf9fec6858d99bc83b3a51b020e53b94955d013c1638e9728c8292ba8"
+content-hash = "5d1a8bce279b619250b1eeeae55e59b88a0ed580f8884c2575c7ed92025191fd"
