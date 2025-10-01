@@ -7,18 +7,18 @@ license = "GNU"
 
 [tool.poetry.dependencies]
 python = "^3.12"
-pydantic-settings = "^2.7.1"
-python-youtube = "^0.9.7"
-pynacl = "^1.5.0"
-yt-dlp = "^2025.1.6"
-py-cord = "^2.6.1"
+pydantic-settings = "^2.11.0"
+python-youtube = "^0.9.8"
+pynacl = "^1.6.0"
+yt-dlp = "^2025.09.26"
+py-cord = "2.7.0rc1"
 slash-cog = "^0.0.3"
 
 [tool.poetry.group.dev.dependencies]
-ruff = "^0.9.6"
-mypy = "^1.15.0"
-pre-commit = "^4.1.0"
-pytest-cov = "^6.0.0"
+ruff = "^0.13.2"
+mypy = "^1.18.2"
+pre-commit = "^4.3.0"
+pytest-cov = "^7.0.0"
 bump-my-version = "^0.32.1"
 
 [tool.isort]
