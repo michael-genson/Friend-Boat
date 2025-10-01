@@ -6,7 +6,7 @@ authors = ["Michael Genson <71845777+michael-genson@users.noreply.github.com>"]
 license = "GNU"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.12"
 pydantic-settings = "^2.7.1"
 python-youtube = "^0.9.7"
 pynacl = "^1.5.0"
@@ -27,4 +27,4 @@ line_length = 120
 [tool.ruff]
 extend-exclude = ["deploy/*", "tests/*"]
 line-length = 120
-target-version = "py311"
+target-version = "py312"
