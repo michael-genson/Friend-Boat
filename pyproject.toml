@@ -10,7 +10,7 @@ python = "^3.12"
 pydantic-settings = "^2.11.0"
 python-youtube = "^0.9.8"
 pynacl = "^1.6.0"
-yt-dlp = "^2025.09.26"
+yt-dlp = "^2025.10.22"
 py-cord = "2.7.0rc1"
 slash-cog = "^0.0.3"
 
