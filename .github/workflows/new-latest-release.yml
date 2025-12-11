@@ -70,7 +70,7 @@ jobs:
       - name: Update version in pyproject.toml and uv.lock
         run: |
           sed -i 's/version = "${{ steps.get_version.outputs.current_version }}"/version = "${{ steps.calc_version.outputs.new_version }}"/' pyproject.toml
-          sed -i '/^name = "friend_boat"$/,/^version = / s/^version = "${{ steps.get_version.outputs.current_version }}"/version = "${{ steps.calc_version.outputs.new_version }}"/' uv.lock
+          sed -i '/^name = "friend-boat"$/,/^version = / s/^version = "${{ steps.get_version.outputs.current_version }}"/version = "${{ steps.calc_version.outputs.new_version }}"/' uv.lock
 
       - name: Commit and tag
         run: |
