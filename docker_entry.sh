@@ -1,2 +1,1 @@
-export PYTHONPATH=. && \
-python -u friend_boat
+uv run python -u -m friend_boat
