@@ -16,45 +16,42 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          virtualenvs-create: true
-          virtualenvs-in-project: true
+      - name: Install uv
+        run: pip install uv
 
       - name: Load cached venv
-        id: cached-poetry-dependencies
-        uses: actions/cache@v3
+        id: cached-python-dependencies
+        uses: actions/cache@v4
         with:
           path: .venv
-          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+          key: venv-${{ runner.os }}-${{ hashFiles('**/uv.lock') }}
 
       - name: Check venv cache
         id: cache-validate
-        if: steps.cached-poetry-dependencies.outputs.cache-hit == 'true'
+        if: steps.cached-python-dependencies.outputs.cache-hit == 'true'
         run: |
-          echo "import discord;print('venv good?')" > test.py && poetry run python test.py && echo ::set-output name=cache-hit-success::true
+          echo "import discord;print('venv good?')" > test.py && uv run python test.py && echo ::set-output name=cache-hit-success::true
           rm test.py
         continue-on-error: true
 
       - name: Install dependencies
         run: |
           sudo apt-get update
-          poetry install
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true' || steps.cache-validate.outputs.cache-hit-success != 'true'
+          uv sync
+        if: steps.cached-python-dependencies.outputs.cache-hit != 'true' || steps.cache-validate.outputs.cache-hit-success != 'true'
 
       - name: Formatting (Ruff)
         run: |
-          poetry run ruff format . --check
+          uv run ruff format . --check
 
       - name: Lint (Ruff)
         run: |
-          poetry run ruff check friend_boat
+          uv run ruff check friend_boat
 
       - name: Mypy
         run: |
-          poetry run mypy friend_boat
+          uv run mypy friend_boat
 
       - name: Pytest
         run: |
-          poetry run pytest
+          uv run pytest

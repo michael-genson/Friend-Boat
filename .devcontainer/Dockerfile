@@ -3,30 +3,9 @@
 ARG VARIANT="3.12-bullseye"
 FROM mcr.microsoft.com/devcontainers/python:${VARIANT}
 
-# [Choice] Node.js version: none, lts/*, 16, 14, 12, 10
-ARG NODE_VERSION="none"
-RUN if [ "${NODE_VERSION}" != "none" ]; then su vscode -c "umask 0002 && . /usr/local/share/nvm/nvm.sh && nvm install ${NODE_VERSION} 2>&1"; fi
-
-# install poetry - respects $POETRY_VERSION & $POETRY_HOME
-
 RUN echo "export PROMPT_COMMAND='history -a'" >> /home/vscode/.bashrc \
     && echo "export HISTFILE=~/commandhistory/.bash_history" >> /home/vscode/.bashrc \
     && chown vscode:vscode -R /home/vscode/
-
-
-ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    PIP_NO_CACHE_DIR=off \
-    PIP_DISABLE_PIP_VERSION_CHECK=on \
-    PIP_DEFAULT_TIMEOUT=100 \
-    POETRY_HOME="/opt/poetry" \
-    POETRY_VIRTUALENVS_CREATE=false
-
-# prepend poetry and venv to path
-ENV PATH="$POETRY_HOME/bin:$PATH"
-
-RUN curl -sSL https://install.python-poetry.org | python -
-# RUN poetry config virtualenvs.create false
 
 RUN apt-get update \
     && apt-get install --no-install-recommends -y \
@@ -34,4 +13,7 @@ RUN apt-get update \
     build-essential \
     ffmpeg \
     gnupg gnupg2 gnupg1
-#     && pip install -U --no-cache-dir pip
+
+# Install uv
+RUN pip install uv
+ENV UV_LINK_MODE=copy
