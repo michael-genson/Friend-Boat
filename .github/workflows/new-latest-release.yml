@@ -1,28 +1,57 @@
 name: New Latest Release
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+    inputs:
+      bump_type:
+        description: 'Version bump type'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+        default: 'patch'
 
 jobs:
-  bump_version:
-    name: Bump Version
+  bump_and_deploy:
+    name: Bump Version and Deploy
     runs-on: ubuntu-latest
     permissions: write-all
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: "Update Latest Tag"
-        uses: EndBug/latest-tag@v1.5.1
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
 
-  publish_docker_image:
-    name: Push Docker image to Docker Hub
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out the repo
-        uses: actions/checkout@v3
+      - name: Install bump-my-version
+        run: pip install bump-my-version
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump version
+        run: |
+          bump-my-version bump ${{ inputs.bump_type }}
+          echo "NEW_VERSION=$(grep -Po '(?<=version = ")[^"]*' pyproject.toml)" >> $GITHUB_ENV
+
+      - name: Push changes
+        run: |
+          git push origin main
+          git push origin v${{ env.NEW_VERSION }}
+
+      - name: Update latest tag
+        run: |
+          git tag -f latest
+          git push origin latest --force
 
       - name: Log in to Docker Hub
         uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
