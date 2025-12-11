@@ -10,12 +10,7 @@ ENV PYTHONUNBUFFERED=1 \
     PYTHONPATH=. \
     PIP_NO_CACHE_DIR=off \
     PIP_DISABLE_PIP_VERSION_CHECK=on \
-    PIP_DEFAULT_TIMEOUT=100 \
-    POETRY_HOME="/opt/poetry" \
-    POETRY_VIRTUALENVS_CREATE=false
-
-# prepend poetry to path
-ENV PATH="$POETRY_HOME/bin:$PATH"
+    PIP_DEFAULT_TIMEOUT=100
 
 ###############################################
 # Builder Image
@@ -26,10 +21,6 @@ RUN apt-get update \
     curl \
     build-essential \
     gnupg gnupg2 gnupg1
-
-# install poetry - respects $POETRY_VERSION & $POETRY_HOME
-ENV POETRY_VERSION=1.5.1
-RUN curl -sSL https://install.python-poetry.org | python -
 
 ###############################################
 # Production Image
@@ -45,16 +36,15 @@ RUN apt-get update \
     && apt-get install --no-install-recommends -y \
     ffmpeg
 
-# copying poetry and venv into image
-COPY --from=builder-base $POETRY_HOME $POETRY_HOME
+RUN pip install uv
 
 # copy app
 COPY ./friend_boat $PROJECT_HOME/friend_boat
-COPY ./poetry.lock ./pyproject.toml $PROJECT_HOME/
+COPY ./uv.lock ./pyproject.toml $PROJECT_HOME/
 
 # install runtime deps
 WORKDIR $PROJECT_HOME
-RUN poetry install --only main
+RUN uv sync --no-dev
 
 VOLUME [ "$PROJECT_HOME/data/" ]
 ENV APP_PORT=9000

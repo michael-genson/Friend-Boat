@@ -1,25 +1,27 @@
-[tool.poetry]
+[project]
 name = "friend_boat"
 version = "1.2.6"
 description = "A simple music bot for Discord"
 authors = ["Michael Genson <71845777+michael-genson@users.noreply.github.com>"]
 license = "GNU"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "py-cord>=2.6.1",
+    "pydantic-settings>=2.12.0",
+    "pynacl>=1.6.1",
+    "python-youtube>=0.9.8",
+    "slash-cog>=0.0.3",
+    "yt-dlp>=2025.12.8",
+]
 
-[tool.poetry.dependencies]
-python = "^3.12"
-pydantic-settings = "^2.11.0"
-python-youtube = "^0.9.8"
-pynacl = "^1.6.0"
-yt-dlp = "^2025.10.22"
-py-cord = "2.7.0rc1"
-slash-cog = "^0.0.3"
-
-[tool.poetry.group.dev.dependencies]
-ruff = "^0.13.2"
-mypy = "^1.18.2"
-pre-commit = "^4.3.0"
-pytest-cov = "^7.0.0"
-bump-my-version = "^1.2.3"
+[dependency-groups]
+dev = [
+    "bump-my-version>=1.2.4",
+    "mypy>=1.19.0",
+    "pre-commit>=4.5.0",
+    "pytest-cov>=7.0.0",
+    "ruff>=0.14.8",
+]
 
 [tool.isort]
 line_length = 120
