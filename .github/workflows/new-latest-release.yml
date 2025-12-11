@@ -33,7 +33,7 @@ jobs:
 
       - name: Get current version
         id: get_version
-        run: echo "current_version=$(grep -Po '(?<=version = ")[^"]*' pyproject.toml)" >> $GITHUB_OUTPUT
+        run: echo "current_version=$(grep -Po '(?<=version = ")[^"]*' pyproject.toml | head -n 1)" >> $GITHUB_OUTPUT
 
       - name: Calculate new version
         id: calc_version
