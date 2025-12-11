@@ -25,7 +25,10 @@ _player_service_by_guild: dict[int, MusicQueueService] = {}
 
 
 class Music(DiscordCogBase):
-    def get_queue_service(self, guild_id: int) -> MusicQueueService:
+    def get_queue_service(self, guild_id: int | None) -> MusicQueueService:
+        if guild_id is None:
+            raise UserNotInServerError()
+
         if guild_id not in _player_service_by_guild:
             _player_service_by_guild[guild_id] = MusicQueueService(self.bot, guild_id)
 
