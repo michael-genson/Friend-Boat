@@ -34,7 +34,8 @@ ENV GIT_COMMIT_HASH=$COMMIT
 
 RUN apt-get update \
     && apt-get install --no-install-recommends -y \
-    ffmpeg
+    ffmpeg \
+    git
 
 RUN pip install uv
 
