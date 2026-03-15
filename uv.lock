@@ -187,6 +187,27 @@ wheels = [
 ]
 
 [[package]]
+name = "davey"
+version = "0.1.4"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/65/b7/814a62dadd9f2b9009b73be172409517371493496ea5947043c98ff2d7a4/davey-0.1.4.tar.gz", hash = "sha256:79e0c64cc3ed6d407e2ebdc672a474065c3bb11297221003d4d12f885ac3d5bf", size = 61466, upload-time = "2026-03-02T17:20:09.348Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/61/f2/dbd2883aff3fc2fc8c991a0cf8cf5a7f4d0f49efa68471fec626591667a3/davey-0.1.4-cp312-cp312-macosx_10_12_x86_64.whl", hash = "sha256:6f06c88e1476cdc410eb71ffb123740541ce783fea7702392990730e46891355", size = 766952, upload-time = "2026-03-02T17:18:43.646Z" },
+    { url = "https://files.pythonhosted.org/packages/a3/7f/9f1a2b6b84db92f10119f0757481a389dac1d21cbf8998570cf34c656fa7/davey-0.1.4-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:f350c7e7a31748d8417d81b95028abffdd8900acfc1ef04c4cac4b2516a97040", size = 728130, upload-time = "2026-03-02T17:18:33.331Z" },
+    { url = "https://files.pythonhosted.org/packages/c2/79/3fb08722acb0e94c1bde2e4f2c946d0e860a2f83056a87c385ff96fac907/davey-0.1.4-cp312-cp312-manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:7c6868d672553a1cf777dab6e8c86e080956e9b39385d69ca7f3cbb1b9fcbcc2", size = 865076, upload-time = "2026-03-02T17:18:07.964Z" },
+    { url = "https://files.pythonhosted.org/packages/40/f0/375f65f13876c85fa19f174adb31284120f89f95846dc09f27166a5cda7d/davey-0.1.4-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:5e9ef4ba26be3edf4d92a3f34311ae23339df8b6664813c4603fbfe94471e4e8", size = 812309, upload-time = "2026-03-02T17:16:47.864Z" },
+    { url = "https://files.pythonhosted.org/packages/3c/72/07dfc6c9415af81989be1a2e505a402436e336705da245ee4b040a1ee6e3/davey-0.1.4-cp312-cp312-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:db09347788fa2c929653070c1d066811d8ddadab07690d89f5f6c10a27d85105", size = 748767, upload-time = "2026-03-02T17:17:07.171Z" },
+    { url = "https://files.pythonhosted.org/packages/a3/03/2e9f0764e03882c71f39eefbab565ff03aa5e3b8fc60bceff2541855cf58/davey-0.1.4-cp312-cp312-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:4852f69ec2fb5dd5e82ee6d11af41ba82ac102be728224aae630d32d2bfd75d4", size = 852393, upload-time = "2026-03-02T17:17:26.814Z" },
+    { url = "https://files.pythonhosted.org/packages/0e/94/b39591ebe5858718dc1839e8c7337f850f96f97a760d853be3059ab8bb37/davey-0.1.4-cp312-cp312-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:de1acd5ce24251392d470d53140f9d8edf704ab519723aed23f7a61700564abb", size = 785268, upload-time = "2026-03-02T17:17:46.848Z" },
+    { url = "https://files.pythonhosted.org/packages/68/aa/c250f75cb6a4213e1f01eb965180f30ff9dda834d11a4a2e5895c96989fe/davey-0.1.4-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:8def645d8ff199835a41808050d74e47b4037b618dbf4180693bd59aa0e92c08", size = 833291, upload-time = "2026-03-02T17:18:20.419Z" },
+    { url = "https://files.pythonhosted.org/packages/2b/b7/17537b53ab14bbbac2c5b3d0f54e34fe7bf3abd86496b869f5a7361aa7e7/davey-0.1.4-cp312-cp312-musllinux_1_2_aarch64.whl", hash = "sha256:8d0cf1bab9a206788c0b5f49d6ab79c2ba64ef40370267c33f2c4bcc9ee850f1", size = 989941, upload-time = "2026-03-02T17:18:52.736Z" },
+    { url = "https://files.pythonhosted.org/packages/66/61/4658aa8c06c73788d2e20d791a44628c7e1527880ca7c3e62a059f985082/davey-0.1.4-cp312-cp312-musllinux_1_2_armv7l.whl", hash = "sha256:924bf7645b24228e63b89101b3bb2cd879e360c3610a0ddb8dabc8457e2c4af1", size = 1025976, upload-time = "2026-03-02T17:19:12.298Z" },
+    { url = "https://files.pythonhosted.org/packages/20/3d/a8c6e6fca56aaa2ac8cc75d942a9fa6347f289fc757d8f8084d40ac1adce/davey-0.1.4-cp312-cp312-musllinux_1_2_i686.whl", hash = "sha256:bba90c6b08c5dcd5b877a89edf8fe307756507a27714430c2bf4d66958cd0fb3", size = 1056511, upload-time = "2026-03-02T17:19:32.813Z" },
+    { url = "https://files.pythonhosted.org/packages/df/72/32417b9203fa379f83fda5a66593973a003f84b3efb4eae295a10f7acbf4/davey-0.1.4-cp312-cp312-musllinux_1_2_x86_64.whl", hash = "sha256:46f6e1c8984bf34494506c5082e115e89d9450540c2f4753f9366ab4378c3d93", size = 1047315, upload-time = "2026-03-02T17:19:52.291Z" },
+    { url = "https://files.pythonhosted.org/packages/ad/11/82972458973e2935fcfc3709bb4d48729c5df9d91553bb9855922b9be0d6/davey-0.1.4-cp312-cp312-win_amd64.whl", hash = "sha256:ac6986a0b08e96f1a289adae495a75c3d086b2bf4b6699837bf5343f15e4790b", size = 788425, upload-time = "2026-03-02T17:20:14.631Z" },
+]
+
+[[package]]
 name = "distlib"
 version = "0.4.0"
 source = { registry = "https://pypi.org/simple" }
@@ -209,7 +230,7 @@ name = "friend-boat"
 version = "1.3.1"
 source = { virtual = "." }
 dependencies = [
-    { name = "py-cord" },
+    { name = "py-cord", extra = ["voice"] },
     { name = "pydantic-settings" },
     { name = "pynacl" },
     { name = "python-youtube" },
@@ -228,7 +249,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "py-cord", git = "https://github.com/Pycord-Development/pycord?rev=master" },
+    { name = "py-cord", extras = ["voice"], git = "https://github.com/Pycord-Development/pycord?rev=master" },
     { name = "pydantic-settings", specifier = ">=2.13.1" },
     { name = "pynacl", specifier = ">=1.6.2" },
     { name = "python-youtube", specifier = ">=0.9.8" },
@@ -495,6 +516,12 @@ source = { git = "https://github.com/Pycord-Development/pycord?rev=master#f96308
 dependencies = [
     { name = "aiohttp" },
     { name = "typing-extensions" },
+]
+
+[package.optional-dependencies]
+voice = [
+    { name = "davey" },
+    { name = "pynacl" },
 ]
 
 [[package]]
