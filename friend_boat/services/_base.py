@@ -30,7 +30,7 @@ class AudioStream(FFmpegPCMAudio):
         effect: AudioStreamEffect | None = None,
         executable: str = "ffmpeg",
         pipe: bool = False,
-        stderr: IO[str] | None = None,
+        stderr: IO[bytes] | None = None,
         before_options: dict[str, str | None] | None = None,
         options: dict[str, str | None] | None = None,
     ) -> None:
