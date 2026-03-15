@@ -3,8 +3,9 @@ import random
 from queue import Empty, Queue
 from typing import cast
 
-from discord import Bot, Message, VoiceClient
+from discord import Bot, Message
 from discord.channel import VocalGuildChannel
+from discord.voice import VoiceClient
 
 from friend_boat.bots.settings import Settings
 from friend_boat.models.music import MusicQueueEmbeds, MusicQueueFullError, MusicQueueItem
