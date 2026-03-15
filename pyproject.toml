@@ -39,3 +39,6 @@ tag = true
 filename = "pyproject.toml"
 search = 'version = "{current_version}"'
 replace = 'version = "{new_version}"'
+
+[tool.uv.sources]
+py-cord = { git = "https://github.com/Pycord-Development/pycord", rev = "master" }
