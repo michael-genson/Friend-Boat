@@ -1,3 +1,5 @@
+import sys
+
 from discord import ApplicationContext, Member, slash_command
 from discord.ext.commands import command, is_owner
 
@@ -20,4 +22,4 @@ class General(DiscordCogBase):
     @command()
     @is_owner()
     async def force_shutdown(self, ctx: ApplicationContext):
-        exit()
+        sys.exit()
