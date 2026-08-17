@@ -146,7 +146,7 @@ class MusicQueueService:
 
     async def _play_next(self, ex: Exception | None = None) -> None:
         if ex:
-            raise
+            raise ex
 
         voice_client = self._get_voice_client()
         if not (voice_client and voice_client.is_connected()):

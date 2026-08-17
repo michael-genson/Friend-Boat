@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Generator
 from dataclasses import dataclass
-from typing import Generator, TypeVar
+from typing import TypeVar
 
 from discord import Embed, Member, User
 from discord.ext.commands import CommandError

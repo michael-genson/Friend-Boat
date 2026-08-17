@@ -29,14 +29,14 @@ class SimplePaginator(discord.ui.View):
         self,
         *,
         timeout: int = 60,
-        PreviousButton: discord.ui.Button = discord.ui.Button(emoji=discord.PartialEmoji(name="\U000025c0")),
-        NextButton: discord.ui.Button = discord.ui.Button(emoji=discord.PartialEmoji(name="\U000025b6")),
-        PageCounterStyle: discord.ButtonStyle = discord.ButtonStyle.grey,
+        PreviousButton: discord.ui.Button | None = None,
+        NextButton: discord.ui.Button | None = None,
+        PageCounterStyle: discord.ButtonStyle | None = None,
         InitialPage: int = 0,
     ) -> None:
-        self.PreviousButton = PreviousButton
-        self.NextButton = NextButton
-        self.PageCounterStyle = PageCounterStyle
+        self.PreviousButton = PreviousButton or discord.ui.Button(emoji=discord.PartialEmoji(name="\U000025c0"))
+        self.NextButton = NextButton or discord.ui.Button(emoji=discord.PartialEmoji(name="\U000025b6"))
+        self.PageCounterStyle = PageCounterStyle or discord.ButtonStyle.grey
         self.InitialPage = InitialPage
 
         self.pages = None

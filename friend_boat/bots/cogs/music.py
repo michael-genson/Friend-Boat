@@ -62,8 +62,7 @@ class Music(DiscordCogBase):
     @option("skip_ahead", description="how far to skip ahead when starting playback, in seconds")
     @option("play_immediately", description="play immediately after the current track, bypassing the queue")
     async def play(self, ctx: ApplicationContext, query: str, skip_ahead: int = 0, play_immediately: bool = False):
-        if skip_ahead < 0:
-            skip_ahead = 0
+        skip_ahead = max(skip_ahead, 0)
 
         # make sure the command was issued from a user in a voice channel
         if (

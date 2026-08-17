@@ -121,7 +121,7 @@ class YouTubeService(MusicPlayerServiceBase):
         effect: AudioStreamEffect | None = None,
     ) -> AudioStream:
         if not isinstance(item, YoutubeVideo):
-            raise Exception("This service does not support this item")
+            raise TypeError("This service does not support this item")
 
         loop = asyncio.get_event_loop()
         ytdl = self.get_ytdl()
