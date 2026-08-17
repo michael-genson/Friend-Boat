@@ -6,21 +6,21 @@ authors = ["Michael Genson <71845777+michael-genson@users.noreply.github.com>"]
 license = "GNU"
 requires-python = ">=3.12,<3.13"
 dependencies = [
-    "py-cord[voice]>=2.7.1",
-    "pydantic-settings>=2.13.1",
+    "py-cord[voice]>=2.8.1",
+    "pydantic-settings>=2.15.0",
     "pynacl>=1.6.2",
-    "python-youtube>=0.9.8",
+    "python-youtube>=0.9.9",
     "slash-cog>=0.0.3",
-    "yt-dlp>=2026.3.3",
+    "yt-dlp>=2026.7.4",
 ]
 
 [dependency-groups]
 dev = [
-    "mypy>=1.19.1",
-    "pre-commit>=4.5.1",
-    "pytest>=9.0.3",
-    "pytest-cov>=7.0.0",
-    "ruff>=0.15.6",
+    "mypy==2.3.1",
+    "pre-commit>=4.6.2",
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "ruff==0.16.3",
 ]
 
 [tool.isort]
