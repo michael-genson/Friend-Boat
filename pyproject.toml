@@ -1,6 +1,6 @@
 [project]
 name = "friend_boat"
-version = "1.4.7"
+version = "1.4.8"
 description = "A simple music bot for Discord"
 authors = [
     { name = "Michael Genson", email = "71845777+michael-genson@users.noreply.github.com" },
