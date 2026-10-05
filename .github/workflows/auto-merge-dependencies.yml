@@ -1,0 +1,81 @@
+name: Auto-merge dependency PRs
+
+on:
+  pull_request:
+    types: [ opened, synchronize, labeled ]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-merge:
+    runs-on: ubuntu-latest
+    # The "automerge" label is only added by renovate.json rules for non-major updates
+    if: contains(github.event.pull_request.labels.*.name, 'dependencies') && contains(github.event.pull_request.labels.*.name, 'automerge')
+
+    steps:
+      - name: Validate PR author
+        env:
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: |
+          if [[ "$AUTHOR" != "renovate[bot]" ]]; then
+            echo "::error::PR author must be renovate[bot] for auto-merge (got: $AUTHOR)"
+            exit 1
+          fi
+          echo "Author validated: $AUTHOR"
+
+      - name: Validate file paths
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          FILES=$(gh pr view "$PR_NUMBER" --repo "$REPO" --json files --jq '.files[].path')
+
+          for file in $FILES; do
+            if [[ "$file" == "pyproject.toml" ]] || \
+               [[ "$file" == "uv.lock" ]] || \
+               [[ "$file" == "Dockerfile" ]]; then
+              continue
+            fi
+
+            echo "::error::Unexpected file path: $file"
+            echo "Only dependency and lock files are allowed for auto-merge"
+            exit 1
+          done
+
+          echo "All files are in allowed paths"
+
+      - name: Approve PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          APPROVED=$(gh pr view "$PR_NUMBER" \
+            --repo "$REPO" \
+            --json reviews \
+            --jq '.reviews[] | select(.state == "APPROVED") | .id' \
+            | wc -l)
+
+          if [ "$APPROVED" -gt 0 ]; then
+            echo "PR already approved"
+            exit 0
+          fi
+
+          gh pr review "$PR_NUMBER" \
+            --repo "$REPO" \
+            --approve \
+            --body "Auto-approved: dependency update from Renovate with valid file paths"
+
+      - name: Enable auto-merge
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh pr merge "$PR_NUMBER" \
+            --repo "$REPO" \
+            --auto \
+            --squash
