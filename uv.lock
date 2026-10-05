@@ -297,7 +297,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "py-cord", extras = ["voice"], git = "https://github.com/Pycord-Development/pycord?rev=master" },
+    { name = "py-cord", extras = ["voice"], specifier = ">=2.8.1" },
     { name = "pydantic-settings", specifier = ">=2.15.0" },
     { name = "pynacl", specifier = ">=1.6.2" },
     { name = "python-youtube", specifier = ">=0.9.9" },
@@ -564,11 +564,15 @@ wheels = [
 
 [[package]]
 name = "py-cord"
-version = "2.8.0rc2.dev41+gda9767a28"
-source = { git = "https://github.com/Pycord-Development/pycord?rev=master#da9767a2819f110cf5fbf8fcf99df13f0fd7d19f" }
+version = "2.8.1"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
     { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/48/99/371cafe39067d46db88477a4badbbf4128938d5a11971f9f0b8f4581efa1/py_cord-2.8.1.tar.gz", hash = "sha256:b1ebd22416941bbeccb6d26df5cbd65ff6b1d47fcbbc9652efae039e46e8a562", size = 1173996, upload-time = "2026-07-25T16:40:10.435Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e3/a6/7aeceb7dfa04c0d390b89ea0b4b980963b93cd972ab6306ad9684811dc6c/py_cord-2.8.1-py3-none-any.whl", hash = "sha256:8b97a61cceb4ca9000fc3ac1190fa4c45ef6a521d88707953f7eeadc1bd57071", size = 1264633, upload-time = "2026-07-25T16:40:08.96Z" },
 ]
 
 [package.optional-dependencies]
