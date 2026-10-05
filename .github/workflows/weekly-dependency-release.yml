@@ -1,0 +1,68 @@
+name: Weekly Dependency Release
+
+on:
+  schedule:
+    # Wednesdays at 15:00 UTC
+    - cron: '0 15 * * 3'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Only report whether a release would be triggered'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  actions: write
+  contents: read
+  pull-requests: read
+
+jobs:
+  check_and_release:
+    name: Release Renovate-only Changes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check unreleased commits
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          COMMITS=$(git rev-list origin/main..origin/develop)
+
+          if [ -z "$COMMITS" ]; then
+            echo "No unreleased commits on develop; nothing to release"
+            echo "should_release=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          for sha in $COMMITS; do
+            # Renovate PRs are squash-merged, so each commit should map to a PR opened by renovate[bot]
+            AUTHOR=$(gh api "repos/$REPO/commits/$sha/pulls" --jq '[.[] | select(.merged_at != null)][0].user.login // empty')
+            SUBJECT=$(git log -1 --format=%s "$sha")
+
+            if [[ "$AUTHOR" != "renovate[bot]" ]]; then
+              echo "Found non-Renovate commit ${sha:0:7} (PR author: ${AUTHOR:-none}): $SUBJECT"
+              echo "Skipping automatic release; release manually instead"
+              echo "should_release=false" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+
+            echo "Renovate commit ${sha:0:7}: $SUBJECT"
+          done
+
+          echo "All unreleased commits are from Renovate"
+          echo "should_release=true" >> $GITHUB_OUTPUT
+
+      - name: Trigger patch release
+        if: steps.check.outputs.should_release == 'true' && inputs.dry_run != true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh workflow run new-latest-release.yml --ref main -f bump_type=patch
+          echo "Triggered patch release"
