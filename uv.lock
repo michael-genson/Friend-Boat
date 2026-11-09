@@ -314,20 +314,20 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "py-cord", extras = ["voice"], specifier = ">=2.8.1" },
-    { name = "pydantic-settings", specifier = ">=2.15.0" },
-    { name = "pynacl", specifier = ">=1.6.2" },
-    { name = "python-youtube", specifier = ">=0.9.9" },
-    { name = "slash-cog", specifier = ">=0.0.3" },
-    { name = "yt-dlp", specifier = ">=2026.7.4" },
+    { name = "py-cord", extras = ["voice"], specifier = "==2.8.1" },
+    { name = "pydantic-settings", specifier = "==2.15.0" },
+    { name = "pynacl", specifier = "==1.6.2" },
+    { name = "python-youtube", specifier = "==0.9.9" },
+    { name = "slash-cog", specifier = "==0.0.3" },
+    { name = "yt-dlp", specifier = "==2026.8.19" },
 ]
 
 [package.metadata.requires-dev]
 dev = [
     { name = "mypy", specifier = "==2.3.1" },
-    { name = "pre-commit", specifier = ">=4.6.2" },
-    { name = "pytest", specifier = ">=9.1.1" },
-    { name = "pytest-cov", specifier = ">=7.1.0" },
+    { name = "pre-commit", specifier = "==4.6.2" },
+    { name = "pytest", specifier = "==9.1.1" },
+    { name = "pytest-cov", specifier = "==7.1.0" },
     { name = "ruff", specifier = "==0.16.3" },
 ]
 
