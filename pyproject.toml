@@ -9,7 +9,7 @@ license = "GNU"
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "py-cord[voice]==2.8.1",
-    "pydantic-settings==2.15.0",
+    "pydantic-settings==2.16.2",
     "pynacl==1.6.2",
     "python-youtube==0.9.9",
     "slash-cog==0.0.3",
