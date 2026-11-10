@@ -13,7 +13,7 @@ dependencies = [
     "pynacl==1.6.2",
     "python-youtube==0.9.9",
     "slash-cog==0.0.3",
-    "yt-dlp==2026.8.19",
+    "yt-dlp==2026.10.26",
 ]
 
 [dependency-groups]
