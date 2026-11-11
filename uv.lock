@@ -300,7 +300,7 @@ wheels = [
 
 [[package]]
 name = "friend-boat"
-version = "1.4.9"
+version = "1.4.10"
 source = { virtual = "." }
 dependencies = [
     { name = "py-cord", extra = ["voice"] },
